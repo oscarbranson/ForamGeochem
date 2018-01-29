@@ -14,4 +14,4 @@ def linear(x, A, B):
     return A + x * B
 
 def linear_inverse(y, A, B):
-    return (y - a) / B
+    return (y - A) / B
