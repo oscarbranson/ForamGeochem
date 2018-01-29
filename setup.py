@@ -1,0 +1,28 @@
+from setuptools import setup, find_packages
+
+setup(name='ForamGeochem',
+      version='0.0.1',
+      description='Tools for working with foraminiferal goechemistry and palaeoproxy data.',
+      url='https://github.com/oscarbranson/ForamGeochem',
+      author='Oscar Branson',
+      author_email='oscarbranson@gmail.com',
+      license='MIT',
+      packages=find_packages(),
+      classifiers=['Development Status :: 4 - Beta',
+                   'Intended Audience :: Science/Research',
+                   'Topic :: Scientific/Engineering',
+                   'Programming Language :: Python :: 2',
+                   'Programming Language :: Python :: 3',
+                   ],
+      install_requires=['numpy',
+                        # 'pandas',
+                        # 'matplotlib',
+                        # 'uncertainties',
+                        ],
+    #   package_data={
+    #     'latools': ['latools.cfg',
+    #                 'resources/*',
+    #                 'resources/data_formats/*',
+    #                 'resources/test_data/*'],
+    #   },
+      zip_safe=False)
