@@ -3,22 +3,22 @@ Transfer functions used for converting Mg/Ca to temperature.
 """
 
 import numpy as np
-
+from foramgeochem.transfer import generic
 
 # exponential, as in traditional palaeothermometer
 def exp_mgca_2_temp(mgca, A, B):
-    return np.log(mgca / A) / B 
+    return generic.exponential(mgca, A, B)
 
 def exp_temp_2_mgca(temp, A, B):
-    return A * np.exp(temp * B)
+    return generic.exponential_inverse(temp, A, B)
 
 
 # linear, for very simple caes
 def lin_mgca_2_temp(mgca, A, B):
-    return B + mgca * A
+    return generic.linear(mgca, A, B)
 
 def lin_temp_2_mgca(temp, A, B):
-    return (temp - B) / A
+    return generic.linear_inverse(temp, A, B)
 
 
 # Evans and Muller (2012)
