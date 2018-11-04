@@ -5,10 +5,8 @@ Functions and classes used for all proxy systems.
 import numpy as np
 import uncertainties as un
 import uncertainties.unumpy as unp
-from .helpers import ucheck
+from .helpers import ucheck, load_params
 
-import pkg_resources as pkgrs
-import json
 
 class params(object):
     """
@@ -59,10 +57,7 @@ class params(object):
     
     @staticmethod
     def load(json_path=None, proxy=None, mode=None, parameters=None):
-        if json_path is None:
-            json_path = pkgrs.ResourceManager().resource_filename("foramgeochem", "resources/params.json")
-        with open(json_path) as f:
-            ps = json.load(f)
+        ps = load_params(json_path)
             
         try:
             ps = ps[proxy]
