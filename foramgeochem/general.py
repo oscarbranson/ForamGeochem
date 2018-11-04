@@ -5,16 +5,48 @@ Functions and classes used for all proxy systems.
 import numpy as np
 import uncertainties as un
 import uncertainties.unumpy as unp
-from .helpers import ucheck, load_params
+from textwrap import wrap
 
+from .helpers import ucheck, load_params
 
 class params(object):
     """
     Container for parameters and their associated uncertainties.
+
+    Attributes
+    ----------
+    values : uncertainties.AffineScalarFunc or uncertainties.ufloat
+        The parameter values and their packaged uncertainties.
+    nom_values : array_like
+        The nominal values of the parameters (without uncertainties)
+    cov : array_like
+        The covariance matrix of the parameter uncertainties.
+    stds : array_like
+        Standard deviations of the parameters (**warning**: ignores covariance)
     """
-    def __init__(self, values, stds=None, cov=None, info=None):
+    def __init__(self, values, cov=None, stds=None, info=None):
         """
         Store parameters and associated uncertainties.
+
+        Parameters
+        ----------
+        values : array_like, dict or uncertainties object
+            Either the nominal values of the parameters, a dictionary
+            containing `values` and `stds` or `cov` used to create
+            a parameter object, or values with associated uncertainties
+            created by the `uncertainties` package.
+        cov : array_like
+            The covariance matrix for the specified parameters used for
+            propagating errors. Only used if `values` is array_like, in
+            which case i should be an array of shape (len(values), len(values)).
+        stds : array_like
+            Standard deviations of the values. This does not account for
+            correllated uncertainties - use `cov` for that. Only used if
+            `values` is array_like, in which case `stds` should be the
+            same length as `values`.
+        info : str
+            A description of the parameteters, to be stored alongside the
+            values.
         """
         if isinstance(values, dict):
             vd = values.copy()
@@ -56,7 +88,29 @@ class params(object):
         return outstr
     
     @staticmethod
-    def load(json_path=None, proxy=None, mode=None, parameters=None):
+    def load(proxy=None, mode=None, parameters=None, json_path=None):
+        """
+        Load one of the pre-defined parameter sets.
+
+        To see a list of available options and their information, use
+        `available_parameters()`.
+
+        Parameters
+        ----------
+        proxy : str
+            The name of the proxy system you're working in.
+        mode : str
+            The 'mode' of the proxy system - e.g. 'exponential' for Mg/Ca
+        parameters : str
+            The name of the parameter set you want to use.
+        json_path : str
+            The location of the json file containing defined parameters.
+            If not specified, uses the built-in file included in `foramgeochem`.
+
+        Returns
+        -------
+        Parameters and their associated uncertainties. : `foramgeochem.general.params` object
+        """
         ps = load_params(json_path)
             
         try:
@@ -75,6 +129,72 @@ class params(object):
             raise KeyError("`parameters` incorrect. Try one of: ['{}']".format("', '".join(ps.keys())))
         
         return params(values=ps)
+
+    @staticmethod
+    def available_parameters(proxy=None, mode=None, parameters=None, json_path=None):
+        """
+        View all available parameter sets, and associated info.
+
+        Arguments can optionally be provided if you want to see a subset of available
+        parameters. For example, specify `proxy='mgca'` to just see modes and parameters
+        for the Mg/Ca proxy.
+
+        Parameters
+        ----------
+        proxy : str
+            The name of the proxy system you're working in.
+        mode : str
+            The 'mode' of the proxy system - e.g. 'exponential' for Mg/Ca
+        parameters : str
+            The name of the parameter set you want to use.
+        json_path : str
+            The location of the json file containing defined parameters.
+            If not specified, uses the built-in file included in `foramgeochem`.
+
+        Returns
+        -------
+        None
+        """
+        bullet = chr(135)
+        linewidth = 96
+
+        if proxy is not None:
+            if isinstance(proxy, str):
+                proxy = [proxy]
+        if mode is not None:
+            if isinstance(mode, str):
+                mode = [mode]
+        if parameters is not None:
+            if isinstance(parameters, str):
+                parameters = [parameters]
+
+        ps = load_params(json_path)
+
+        for k0, v0 in ps.items():
+            if proxy is not None:
+                if k0 not in proxy:
+                    continue
+            pname = '{} {} [proxy]'.format(bullet, k0)
+            print('-' * (linewidth + 5))
+            print(pname)
+            print('-' * len(pname))
+
+            for k1, v1 in v0.items():
+                if mode is not None:
+                    if k1 not in mode:
+                        continue
+                mname = ' {} {} [mode]'.format(bullet, k1)
+                print(mname)
+                print(' ' + '-' * (len(mname) - 1))
+
+                for k2, v2 in v1.items():
+                    if parameters is not None:
+                        if k2 not in parameters:
+                            continue
+                    print('  {} {} [parameters]'.format(bullet, k2))
+                    print('     ' + '\n     '.join(wrap(v2['info'], linewidth)))
+
+        print('-' * (linewidth + 5))
 
 class proxy(object):
     """
