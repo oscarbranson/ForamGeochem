@@ -28,6 +28,9 @@ class exponential(proxy):
         """
         super().__init__()
         
+        self.fn_name = 'Exponential Mg/Ca-Temperature Relationship'
+        self.fn_text = 'mgca_f = A * exp(temperature * B)'
+
         # update class attributes for exponential case
         self.variables.update(['mgca_f', 'temperature'])
         
@@ -51,11 +54,13 @@ class exponential(proxy):
     
     def __repr__(self):
         outstr = []
-        outstr.append('Exponential Mg/Ca-Temperature Relationship')
-        outstr.append('------------------------------------------')
-        outstr.append('Parameter Info: ' + self.parameters.info)
-        outstr.append(' - Variables Accepted: {}'.format(self.variables))
-        outstr.append(' - Variables Provided: {}'.format(self.variables.difference(self.missing)))
+        outstr.append(self.fn_name)
+        outstr.append('-' * len(self.fn_name))
+        outstr.append(self.fn_text + '\n')
+        outstr.append(self.parameters.__repr__())
+        outstr.append('\nVariables:')
+        outstr.append('  Accepted: {}'.format(self.variables))
+        outstr.append('  Provided: {}'.format(self.variables.difference(self.missing)))
 
         return '\n'.join(outstr)
 
@@ -74,7 +79,7 @@ class exponential(proxy):
         self._var_check()
         
         if 'mgca_f' not in self.missing:
-            self.last_calc = self._calc_temp(self.mgca_f, *self.parameters.values)
+            self.last_calc = self._calc_temp(self.mgca_f, self.parameters.values)
         else:
             raise ValueError('Please provide `mgca_f`')
             
@@ -88,7 +93,7 @@ class exponential(proxy):
         self._var_check()
         
         if 'temperature' not in self.missing:
-            self.last_calc = self._calc_mgca_f(self.temperature, *self.parameters.values)
+            self.last_calc = self._calc_mgca_f(self.temperature, self.parameters.values)
         else:
             raise ValueError('Please provide `mgca_f`')
             
@@ -105,6 +110,8 @@ class Holland(proxy):
 
         Uses the formulation of Holland et al (2018). Different parameter sets discussed
         in the paper are available via the 'parameters' argument.
+
+        mgca_f = mgca_sw**A * B exp((C1 * ca_sw + C2 * carb_sw + D) * temperature)
 
         Parameters
         ----------
@@ -126,6 +133,9 @@ class Holland(proxy):
         """
         super().__init__()
         
+        self.fn_name = 'Holland et al (2018) Multi-factor Mg/Ca Equation'
+        self.fn_text = 'mgca_f = mgca_sw**A * B exp((C1 * ca_sw + C2 * carb_sw + D) * temperature)'
+
         # update class attributes for exponential case
         self.variables.update(['mgca_f', 'temperature', 'carb_sw', 'ca_sw', 'mgca_sw'])
         
@@ -151,11 +161,13 @@ class Holland(proxy):
 
     def __repr__(self):
         outstr = []
-        outstr.append('Holland et al (2018) Multi-factor Mg/Ca Equation')
-        outstr.append('------------------------------------------------')
-        outstr.append('Parameter Info: ' + self.parameters.info)
-        outstr.append(' - Variables Accepted: {}'.format(self.variables))
-        outstr.append(' - Variables Provided: {}'.format(self.variables.difference(self.missing)))
+        outstr.append(self.fn_name)
+        outstr.append('-' * len(self.fn_name))
+        outstr.append(self.fn_text + '\n')
+        outstr.append(self.parameters.__repr__())
+        outstr.append('\nVariables:')
+        outstr.append('  Accepted: {}'.format(self.variables))
+        outstr.append('  Provided: {}'.format(self.variables.difference(self.missing)))
 
         return '\n'.join(outstr)
 
