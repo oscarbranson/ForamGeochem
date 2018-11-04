@@ -8,11 +8,14 @@ Each proxy in `foramgeochem` is included as a sub-module, which contains all fun
 
     from foramgeochem import mgca
 
+Implemented Proxies:
+ - :ref:`mgca`
+
 Converters
 ----------
 Each proxy contains one or more 'converters'. These contain everything you need to use a particular form of the proxy, including the ability to load parameter presets, and automatic uncertainty propagation. This will be sufficient for most cases.
 
-For example, the :mod:`~foramgeochem.mgca` module contains two converters: :class:`~foramgeochem.mgca.exponential` and :class:`~foramgeochem.mgca.Holland`, which contain two different forms of the proxy equation. The former relates Mg/Ca to temperature via the 'classic' exponential equation, whereas the latter uses the new formulation of Holland et al (2018) that includes for multiple aspects of seawater chemistry. These converters are available directly from the :mod:`~foramgeochem.mgca` submodule, after you've imported it (above), and can be used like this:
+For example, the :mod:`~foramgeochem.mgca` module contains two converters: :class:`~foramgeochem.mgca.exponential` and :class:`~foramgeochem.mgca.Holland`, which contain two different forms of the proxy equation. The former relates Mg/Ca to temperature via the 'classic' exponential equation, whereas the latter uses the new formulation of Holland et al (sub.) that includes for multiple aspects of seawater chemistry. These converters are available directly from the :mod:`~foramgeochem.mgca` submodule, after you've imported it (above), and can be used like this:
 
 .. code :: python
 
@@ -31,7 +34,7 @@ To find out what state your converter object is in, simply type `my_record` to s
     > 
     > Parameter Set: Multispecies_Anand
     >   Exponential function re-fit to multispecies data of Anand et al (1996)
-    >   by Holland et al (2018).
+    >   by Holland et al (sub.).
     > 
     > Parameter Values:
     >   A: 0.445+/-0.030
