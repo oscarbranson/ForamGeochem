@@ -12,7 +12,8 @@ In these pages you'll find general information on how to use the ``foramgeochem`
     :maxdepth: 2
     :caption: Getting Started:
 
-    general/index.rst
+    general/install.rst
+    general/basics.rst
 
 .. toctree ::
     :maxdepth: 2
