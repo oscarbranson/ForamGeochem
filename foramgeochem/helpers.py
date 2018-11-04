@@ -14,6 +14,9 @@ def ucheck(v):
         return isinstance(v, (un.core.AffineScalarFunc, un.core.Variable))
     
 def load_params(json_path=None):
+    """
+    Loads parameters .json file.
+    """
     if json_path is None:
         json_path = pkgrs.ResourceManager().resource_filename("foramgeochem", "resources/params.json")
     with open(json_path) as f:
