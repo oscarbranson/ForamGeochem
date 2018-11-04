@@ -12,10 +12,9 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-# import os
-# import sys
-# sys.path.insert(0, os.path.abspath('.'))
-
+import os
+import sys
+sys.path.insert(0, os.path.abspath('../..'))
 
 # -- Project information -----------------------------------------------------
 
@@ -24,7 +23,7 @@ copyright = '2018, Oscar Branson'
 author = 'Oscar Branson'
 
 # The short X.Y version
-version = ''
+version = '0.0.1'
 # The full version, including alpha/beta/rc tags
 release = '0.0.1'
 
@@ -44,7 +43,17 @@ extensions = [
     'sphinx.ext.todo',
     'sphinx.ext.coverage',
     'sphinx.ext.mathjax',
+    'sphinx.ext.napoleon',
+    'sphinx.ext.autosummary',
 ]
+
+# autodoc options
+autodoc_default_flags = ['members', 'undoc-members', 'show-inheritance', 'inherited-members']
+autosummary_generate = True
+
+# Napoleon options
+napoleon_numpy_docstring = True
+napoleon_google_docxtring = False
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -79,14 +88,17 @@ pygments_style = None
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'alabaster'
+# html_theme = 'alabaster'
+html_theme = 'sphinx_rtd_theme'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
 #
-# html_theme_options = {}
-
+html_theme_options = {
+    'navigation_depth': 3,
+    # 'collapse_navigation': True
+}
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
