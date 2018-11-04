@@ -1,1 +1,1 @@
-from .converters import MgCa_exponential, MgCa_Holland
+from .converters import exponential, Holland
