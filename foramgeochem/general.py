@@ -5,9 +5,11 @@ Functions and classes used for all proxy systems.
 import numpy as np
 import uncertainties as un
 import uncertainties.unumpy as unp
-from textwrap import wrap
+from textwrap import wrap, TextWrapper
 
 from .helpers import ucheck, load_params
+
+linewidth = 70
 
 class params(object):
     """
@@ -24,7 +26,7 @@ class params(object):
     stds : array_like
         Standard deviations of the parameters (**warning**: ignores covariance)
     """
-    def __init__(self, values, cov=None, stds=None, info=None):
+    def __init__(self, values, cov=None, stds=None, info=None, labels=None):
         """
         Store parameters and associated uncertainties.
 
@@ -47,6 +49,8 @@ class params(object):
         info : str
             A description of the parameteters, to be stored alongside the
             values.
+        labels : array_like
+            Parameter names.
         """
         if isinstance(values, dict):
             vd = values.copy()
@@ -57,10 +61,15 @@ class params(object):
                 cov = vd['cov']
             if 'info' in vd:
                 info = vd['info']
+            if 'labels' in vd:
+                labels = vd['labels']
         
         if info is None:
             info = 'No information given.'
-        self.info = info
+        self.info = info        
+        self.labels = labels
+
+        self.param_name = ''
 
         if ucheck(values):
             self.values = values
@@ -80,11 +89,17 @@ class params(object):
             self.nom_values = np.asanyarray(self.values)
             self.stds = np.full(len(self.values), np.nan)
             self.stds = np.full((len(self.values),len(self.values)), np.nan)
+
+        self.wrap = TextWrapper(linewidth).wrap
     
     def __repr__(self):
-        outstr = self.info + '\n\n'
+        outstr = 'Parameter Set: {}\n  '.format(self.param_name)
+        outstr += '\n  '.join(self.wrap(self.info)) + '\n\n'
         outstr += 'Parameter Values:\n  '
-        outstr += '\n  '.join('{}'.format(v) for v in self.values)
+        if self.labels is not None:
+            outstr += '\n  '.join('{}: {}'.format(lab, v) for lab, v in zip(self.labels, self.values))
+        else:
+            outstr += '\n  '.join('{}'.format(v) for v in self.values)
         return outstr
     
     @staticmethod
@@ -128,7 +143,10 @@ class params(object):
         except:
             raise KeyError("`parameters` incorrect. Try one of: ['{}']".format("', '".join(ps.keys())))
         
-        return params(values=ps)
+        p = params(values=ps)
+        p.param_name = parameters
+        
+        return p
 
     @staticmethod
     def available_parameters(proxy=None, mode=None, parameters=None, json_path=None):
@@ -156,7 +174,6 @@ class params(object):
         None
         """
         bullet = chr(135)
-        linewidth = 96
 
         if proxy is not None:
             if isinstance(proxy, str):
@@ -205,6 +222,11 @@ class proxy(object):
         self.missing = set()
         self.last_calc = None
         
+        self.wrap = TextWrapper(linewidth).wrap
+
+        self.fn_name = ''
+        self.fn_text = ''
+
     def _var_check(self):
         """
         Check which of the required variables is missing.
@@ -220,6 +242,9 @@ class proxy(object):
         Update the values of all variables specified as varname=value.
         """
         for k, v in kwargs.items():
+            if v is not None:
+                v = np.asanyarray(v)
+
             if not hasattr(self, k):
                 setattr(self, k, v)
             elif v is not None:
