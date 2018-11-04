@@ -6,15 +6,29 @@
 Welcome to ForamGeochem's documentation!
 ========================================
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+In these pages you'll find general information on how to use the ``foramgeochem`` module, and currently implemented proxies.
 
+.. toctree ::
+    :maxdepth: 2
+    :caption: Getting Started:
 
+    general/index.rst
 
-Indices and tables
-==================
+.. toctree ::
+    :maxdepth: 2
+    :caption: Proxies:
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+    mgca/index.rst
+
+.. toctree ::
+    :maxdepth: 2
+    :caption: Function Documentation:
+
+    autodoc.rst
+
+.. 
+    Indices and tables
+    ==================
+    * :ref:`genindex`
+    * :ref:`modindex`
+    * :ref:`search`
