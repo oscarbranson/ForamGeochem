@@ -102,13 +102,13 @@ class exponential(proxy):
 
 class Holland(proxy):
     """
-    The multi-factor modified exponential relationship between Mg/Ca, temperature, carbon, [Ca] and Mg/Casw of Holland et al (2018)
+    The multi-factor modified exponential relationship between Mg/Ca, temperature, carbon, [Ca] and Mg/Casw of Holland et al (sub.)
     """
     def __init__(self, mgca_f=None, temperature=None, carb_sw=2100e-6, ca_sw=10.2e-3, mgca_sw=5.0, parameters=None):
         """
         Create an object for converting between Mg/Ca and environmental parameters.
 
-        Uses the formulation of Holland et al (2018). Different parameter sets discussed
+        Uses the formulation of Holland et al (sub.). Different parameter sets discussed
         in the paper are available via the 'parameters' argument.
 
         mgca_f = mgca_sw**A * B exp((C1 * ca_sw + C2 * carb_sw + D) * temperature)
@@ -133,7 +133,7 @@ class Holland(proxy):
         """
         super().__init__()
         
-        self.fn_name = 'Holland et al (2018) Multi-factor Mg/Ca Equation'
+        self.fn_name = 'Holland et al (sub.) Multi-factor Mg/Ca Equation'
         self.fn_text = 'mgca_f = mgca_sw**A * B exp((C1 * ca_sw + C2 * carb_sw + D) * temperature)'
 
         # update class attributes for exponential case
