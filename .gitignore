@@ -1,3 +1,5 @@
 .ipynb_checkpoints/*
 *.pyc
 *dev*
+docs/build/*
+docs/source/_build/*
