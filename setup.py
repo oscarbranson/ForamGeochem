@@ -3,6 +3,7 @@ from setuptools import setup, find_packages
 setup(name='foramgeochem',
       version='0.0.1',
       description='Tools for converting between foraminifera geochemistry and environmental parameters.',
+      long_description="Python tools for converting between foraminiferal geochemistry and environmental parameters.",
       url='https://github.com/oscarbranson/foramgeochem',
       author='Oscar Branson',
       author_email='oscarbranson@gmail.com',
