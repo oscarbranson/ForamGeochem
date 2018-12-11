@@ -6,3 +6,4 @@ docs/source/_build/*
 dist/*
 foramgeochem.egg-info/*
 build/*
+Supplementary/*/.ipynb_checkpoints/*
