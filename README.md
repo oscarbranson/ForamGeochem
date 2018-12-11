@@ -6,4 +6,11 @@
 </div>
 
 # ForamGeochem
+
 Tools for working with foraminifera geochemistry and derived palaeoproxies
+
+[Click here to see package documentation.](https://foramgeochem.readthedocs.io/en/latest/)
+
+## Installation
+
+    pip install foramgeochem
