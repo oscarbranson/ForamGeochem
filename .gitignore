@@ -3,3 +3,6 @@
 *dev*
 docs/build/*
 docs/source/_build/*
+dist/*
+foramgeochem.egg-info/*
+build/*
