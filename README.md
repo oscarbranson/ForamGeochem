@@ -19,4 +19,4 @@ Tools for working with foraminifera geochemistry and derived palaeoproxies
 
 This module includes supplementary information to the following manuscripts:
 
-- [Holland, K., Branson, O., Haynes, L., Hönisch, B., Allen, K.A., Russell, A., Fehrenbacher, J., Spero, H.J., Eggins, S.E (*submitted*) Constraining multiple controls on planktic foraminifera Mg/Ca.](https://nbviewer.jupyter.org/github/oscarbranson/ForamGeochem/blob/master/Supplementary/Holland_MgCa/Holland_Supplement.ipynb)
+- [Holland, K., Branson, O., Haynes, L., Hönisch, B., Allen, K.A., Russell, A., Fehrenbacher, J., Spero, H.J., Eggins, S.E (*submitted*) Constraining multiple controls on planktic foraminifera Mg/Ca.](https://github.com/oscarbranson/ForamGeochem/tree/master/Supplementary/Holland_MgCa)
