@@ -6,7 +6,7 @@ from numpy import ma
 import mpl_toolkits.axisartist.grid_finder as GF
 import mpl_toolkits.axisartist.floating_axes as FA
 import matplotlib.pyplot as plt
-import netCDF4
+# import netCDF4
 
 from matplotlib.projections.polar import PolarAxes
 
@@ -57,11 +57,10 @@ def Taylor_diag(series, smax=1.5):
                                        extremes=(0, np.pi/2, # 1st quadrant
                                                  smin,smax),
                                        grid_locator1=gl1,
-                                       #grid_locator2=g11,
                                        tick_formatter1=tf1,
                                        tick_formatter2=tf2,
                                        )
-    fig = plt.figure(figsize=(10,5), dpi=100)
+    fig = plt.figure(figsize=(7, 5), dpi=100)
     ax = FA.FloatingSubplot(fig, 111, grid_helper=ghelper)
 
     fig.add_subplot(ax)
@@ -102,12 +101,12 @@ def Taylor_diag(series, smax=1.5):
     ax.plot(np.arccos(0.9999),ref,'k',marker='*',ls='', ms=10, label='Observed')
 
     # plot modelled points
-    aux = list(series.keys())[1:]
+    aux = [k for k in series.keys() if k != 0]
     
     for i in aux:
         ax.scatter(np.arccos(corr[i]), std[i], marker='o', label=i, zorder=5, s=50)
         # ax.text(np.arccos(corr[i]), std[i], i)
     
-    plt.legend(bbox_to_anchor=(1.5, 1),prop=dict(size='large'),loc='best', fontsize=9)
+    plt.legend(bbox_to_anchor=(1.7, 1),prop=dict(size='large'),loc='best', fontsize=8)
     
     return fig, ax

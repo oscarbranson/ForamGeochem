@@ -3,7 +3,7 @@ Functions for calculating the C system using pitzer and MyAMI_V1
 """
 import pandas as pd
 import cbsyst as cb  # must be co2sys_compare branch
-from tqdm import tqdm
+from tqdm import tqdm_notebook as tqdm
 from .phreeq import calc_pitzer_fKs
 
 def calc_pitzer_Csys(d, 

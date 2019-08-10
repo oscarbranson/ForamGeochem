@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 from matplotlib import ticker
 
 from scipy import stats
+from sklearn.linear_model import LinearRegression
 from scipy.optimize import curve_fit
 import uncertainties as un
 from uncertainties.unumpy import nominal_values as nom
@@ -14,8 +15,10 @@ from uncertainties.unumpy import std_devs as err
 from cbsyst import Csys
 
 from .helpers import isolate_constant_conditions
-from .plot import emphasise_subset, subset_trendline, contour_labels
+from .plot import emphasise_subset, subset_trendline, contour_labels, lighten_color
 from .model import T_fn
+
+plt.rcParams['axes.labelsize'] = 'small'
 
 # Code for making figures in paper
 ##################################
@@ -28,6 +31,12 @@ def fig1(dat, rus, mdict, ldict):
     # ax.scatter(russub.loc[:, ('Measured', 'Temp')], russub.loc[:, ('Measured', 'Mg/Caf')], 
     #         marker='D', edgecolor='orange', facecolor='w', zorder=6, label='Russell et al (2004)')
 
+    c_amb = 'k'
+    c_cation = lighten_color('C0', 0.8)
+    c_anion = lighten_color('C1', 0.9)
+    c_both = 'C4'
+    c_russel = 'C0'
+    ecolor = (.3,.3,.3)
     for who in dat.Measured.who.unique():
         whosub = dat.loc[dat.loc[:, ('Measured', 'who')] == who]
         subamb = isolate_constant_conditions(whosub, Mg=50, Ca=10.2, MgCa=5.1, DIC=2000, pH=8.05)
@@ -36,43 +45,44 @@ def fig1(dat, rus, mdict, ldict):
         cation_exp = isolate_constant_conditions(subexp, DIC=2000, pH=8.05)
         anion_exp = isolate_constant_conditions(subexp, Mg=50, Ca=10.2, MgCa=5.1)
         both_var = subexp.drop(np.concatenate([cation_exp.index, anion_exp.index]))
-    
+        
         ax.errorbar(subamb.loc[:, ('Measured', 'Temp')],
                     subamb.loc[:, ('Measured', 'Mg/Caf')],
                     yerr=subamb.loc[:, ('Measured', 'Mg/Caf 2se')],
-                    lw=0, elinewidth=1, marker=mdict[who], color='k', label=ldict[who], markersize=5)
+                    lw=0, elinewidth=1, marker=mdict[who], color=c_amb, label=ldict[who], markersize=5, markeredgecolor=ecolor, markeredgewidth=0.5)
         
         ax.errorbar(cation_exp.loc[:, ('Measured', 'Temp')],
                     cation_exp.loc[:, ('Measured', 'Mg/Caf')],
                     yerr=cation_exp.loc[:, ('Measured', 'Mg/Caf 2se')],
-                    lw=0, elinewidth=1, marker=mdict[who], color='r', alpha=.6, markersize=5, label="_", zorder=2)
+                    lw=0, elinewidth=1, marker=mdict[who], color=c_cation, markersize=5, label="_", zorder=2, markeredgecolor=ecolor, markeredgewidth=0.5)
         
         ax.errorbar(anion_exp.loc[:, ('Measured', 'Temp')],
                     anion_exp.loc[:, ('Measured', 'Mg/Caf')],
                     yerr=anion_exp.loc[:, ('Measured', 'Mg/Caf 2se')],
-                    lw=0, elinewidth=1, marker=mdict[who], color='b', alpha=.6, markersize=5, label="_", zorder=2)
+                    lw=0, elinewidth=1, marker=mdict[who], color=c_anion, markersize=5, label="_", zorder=2, markeredgecolor=ecolor, markeredgewidth=0.5)
         
         ax.errorbar(both_var.loc[:, ('Measured', 'Temp')],
                     both_var.loc[:, ('Measured', 'Mg/Caf')],
                     yerr=both_var.loc[:, ('Measured', 'Mg/Caf 2se')],
-                    lw=0, elinewidth=1, marker=mdict[who], color='purple', alpha=.6, markersize=5, label="_", zorder=2)
+                    lw=0, elinewidth=1, marker=mdict[who], color=c_both, markersize=5, label="_", zorder=2, markeredgecolor=ecolor, markeredgewidth=0.5)
 
-    ax.scatter([], [], color='k', alpha = 0.3, marker='', label='Variable T$^{\circ}C$ only')
-    ax.scatter([], [], color='r', alpha=0.3, marker='', label='Variable [Mg] and [Ca]')
-    ax.scatter([], [], color='b', alpha=0.3, marker='', label='Variable pH and [DIC]')
-    ax.scatter([], [], color=(.6, 0, .6), alpha=0.3, marker='', label='Multiple Variables')
+    ax.scatter([], [], color=c_amb, alpha = 0.3, marker='', label='Variable T$^{\circ}C$ only')
+    ax.scatter([], [], color=c_cation, alpha=0.3, marker='', label='Variable [Mg] and [Ca]')
+    ax.scatter([], [], color=c_anion, alpha=0.3, marker='', label='Variable pH and DIC')
+    ax.scatter([], [], color=c_both, alpha=0.3, marker='', label='Multiple Variables')
+    ax.plot([],[],color=c_russel, label='Russell Fit')
 
     handles, labels = ax.get_legend_handles_labels()
 
-    leg = ax.legend(handles[-3:] + handles[:-3], labels[-3:] + labels[:-3], loc='upper left', fontsize=8)
+    leg = ax.legend(handles[-3:] + handles[1:-3] + handles[:1], labels[-3:] + labels[1:-3] + labels[:1], loc='upper left', fontsize=8)
 
     for text in leg.get_texts():
         if '[Mg]' in text.get_text():
-            text.set_color((1, 0, 0, 0.6))
-        if '[DIC]' in text.get_text():
-            text.set_color((0, 0, 1, 0.6))
+            text.set_color(c_cation)
+        if 'DIC' in text.get_text():
+            text.set_color(c_anion)
         if 'Multiple' in text.get_text():
-            text.set_color((.6, 0, .6, 0.6))
+            text.set_color(c_both)
 
     def expfn(x, A, B):
         return B * np.exp(x * A)
@@ -109,15 +119,17 @@ def fig1(dat, rus, mdict, ldict):
 
     rust = np.linspace(*ax.get_xlim())
     rusmgca = expfn_err(rust, *rp_err)
-    ax.plot(rust, nom(rusmgca), ls='dashed', zorder=5, color='orange', lw=1)
+    ax.plot(rust, nom(rusmgca), zorder=5, color='C0', lw=1)
     ax.fill_between(rust, 
                     nom(rusmgca) - rCI95_m * err(rusmgca),
                     nom(rusmgca) + rCI95_m * err(rusmgca), 
-                    zorder=-2, alpha=0.3, color='orange', lw=0)
+                    zorder=-2, alpha=0.3, color='C0', lw=0)
 
 
     ax.set_xlabel('Temperature ($^{\circ}C$)')
     ax.set_ylabel('$Mg/Ca_{\it{O. universa}}\ (mmol\ mol^{-1}$)')
+
+    # fig.tight_layout()
 
     return fig, ax
 
@@ -496,7 +508,7 @@ def fig3(dat, mdict):
             subset_trendline(ax, dsub, ('Measured', '[Ca]sw'), 'k', 1,
                             yvar=('Measured', 'D_Mg'))
 
-        # Low [DIC]
+        # Low DIC
         ssub = isolate_constant_conditions(sub, Temp=22, DIC=1000, pH=None)
         emphasise_subset(ax, ssub, ('Measured', '[Ca]sw'), color='C2', yvar=('Measured', 'D_Mg'), m=m)
         if first:
@@ -505,7 +517,7 @@ def fig3(dat, mdict):
                             yvar=('Measured', 'D_Mg'), label='$DIC \\approx 1000$', label_x=21, fontsize=6,
                                 label_v_offset_frac=-0.08)
 
-        # High [DIC]
+        # High DIC
         ssub = isolate_constant_conditions(sub, Temp=22, DIC=4000, pH=None)
         emphasise_subset(ax, ssub, ('Measured', '[Ca]sw'), color='C0', yvar=('Measured', 'D_Mg'), m=m)
         if first:
@@ -546,7 +558,7 @@ def fig4(dat, params, pred, pred_T, ifa_rsd, mdict, cis_upper, cis_lower, med_if
             'color': (0,0,0,0.3),
             'zorder': -1}
 
-    for s in ['This Study', 'Spero', 'Russell']:
+    for s in dat.Measured.who.unique():
         ind = dat.Measured.who == s
         mgax.scatter(dat.loc[ind, ('Measured', 'Mg/Caf')], nom(pred[ind]), marker=mdict[s],
                     s=dat.loc[ind, ('Measured', 'numberforams')], c=dat.loc[ind, ('csys_mid', 'pHtot')], **opts)
@@ -602,13 +614,13 @@ def fig4(dat, params, pred, pred_T, ifa_rsd, mdict, cis_upper, cis_lower, med_if
     tax.set_xlabel('Measured Temperature ($^{\circ}C$)')
     tax.set_ylabel('Predicted Tempterature ($^{\circ}C$)')
 
-    label1 = '$Mg/Ca_{\it{O. universa}} = Mg/Ca_{SW}^A B\ e^{(C_1\ [Ca]_{SW} + C_2\ [DIC]_{SW} + D) T}$'
+    label1 = '$Mg/Ca_{foram} = Mg/Ca_{SW}^A\ DIC^B\ e^{C\ [Ca]_{SW} + D T + E}$'
 
     label2 = ("A: {:.3f}\n".format(params[0]) +
-            "B: {:.3f}\n".format(params[1]) +
-            "C1: {:.3f}\n".format(params[2]) +
-            "C2: {:.3f}\n".format(params[3]) +
-            "D: {:.3f}\n".format(params[4]))
+              "B: {:.3f}\n".format(params[1]) +
+              "C: {:.3f}\n".format(params[2]) +
+              "D: {:.3f}\n".format(params[3]) +
+              "E: {:.3f}\n".format(params[4]))
     fig.tight_layout(rect=[0,0,.9,1])
 
     mgax.text(.98, .02, label1, ha='right', va='bottom', transform=mgax.transAxes, fontsize=6)
@@ -640,7 +652,7 @@ def fig4(dat, params, pred, pred_T, ifa_rsd, mdict, cis_upper, cis_lower, med_if
 
     return fig, ax
 
-def fig5(rd, gray, rmdict, rrdict, rpred, rpar, tstyle):
+def fig7(rd, gray, rmdict, rrdict, rpred, rpar, tstyle):
     fig, axs = plt.subplots(2, 2, figsize=[6, 6], sharey=True, sharex=True)
 
     axs = axs.flatten()
@@ -664,8 +676,8 @@ def fig5(rd, gray, rmdict, rrdict, rpred, rpar, tstyle):
                     yerr=err(rpred[pt][d.who == w]),
                     xerr=d.loc[d.who == w, 'Mg/Caf 2se'], lw=0, elinewidth=1, color=(0,0,0,0.3), zorder=-1)
 
-
-    for i, t in zip([1, 3], ['white', 'pink']):
+    # draw CO3 fits
+    for i, t, ylab in zip([1, 3], ['white', 'pink'], [0.76, 0.84]):
         ax = axs[i]
         d = rd.loc[rd.Type == t]
         
@@ -680,43 +692,43 @@ def fig5(rd, gray, rmdict, rrdict, rpred, rpar, tstyle):
         ax.legend(fontsize=7, loc='lower right', framealpha=0.2, borderpad=0.3)
         
         upe = rpar[t]
-        upeph = rpar[t + '_pH']
         if t == 'white':
             parlab = ("A: {:.3f}\n".format(upe[0]) +
                     "B: {:.3f}\n".format(upe[1]) +
-                    "$C_1$" + ": {:.1f}\n".format(upe[2]) +
-                    "$C_2$" + ": {:.3f}\n".format(upe[3]) + 
-                    "D: {:.3f}\n".format(upe[4]))
+                    "C: {:.1f}\n".format(upe[2]) +
+                    "D: {:.3f}\n".format(upe[3]) + 
+                    "E: {:.3f}\n".format(upe[4]))
         else:
-            parlab = ("P: {:.3f}\n".format(upe[0]) +
-            "$C_1$" + ": {:.1f}\n".format(upe[1]) +
-            "$C_2$" + ": {:.3f}\n".format(upe[2]) + 
-            "D: {:.3f}\n".format(upe[3]))
+            parlab = ("B: {:.3f}\n".format(upe[0]) +
+            "C: {:.1f}\n".format(upe[1]) +
+            "D: {:.3f}\n".format(upe[2]) + 
+            "E: {:.3f}\n".format(upe[3]))
 
-        y = 0.76
-        # if i == 3:
-        #     y = 0.76
-        # else:
-        #     y = 0.84
-        ax.text(.03, y, parlab, va='top', ha='left', fontsize=6, color=(.3, .3, .3), transform=ax.transAxes)
+        ax.text(.03, ylab, parlab, va='top', ha='left', fontsize=6, color=(.3, .3, .3), transform=ax.transAxes)
         
     # Gray data
     ax = axs[2]
-    ax.scatter(gray.loc[:, 'G. ruber w Mg/Ca [mmol/mol]'], nom(rpred['gray']), 
+    ax.scatter(gray.loc[:, 'G. ruber w Mg/Ca [mmol/mol]'], nom(rpred['gray'][:gray.shape[0]]), 
             marker='.', label='Gray et al. (2018)', s=15, **tstyle['white'], alpha=0.6)
     ax.legend(fontsize=7, loc='lower right', framealpha=0.2, borderpad=0.3)
 
+    d = rd.loc[rd.Type == 'white']
+    for w in d.who.unique():
+        x = d.loc[d.who == w, 'Mg/Caf']
+        y = rpred['gray'][gray.shape[0]:][d.who == w]
+        ax.scatter(x, nom(y), marker=rmdict[w], label=rrdict[w], s=15, **tstyle['white'])
+        
+        ax.errorbar(x, nom(y), yerr=err(y), xerr=d.loc[d.who == w, 'Mg/Caf 2se'], lw=0, elinewidth=1, color=(0,0,0,0.3), zorder=-1)
+
     upe = rpar['gray']
-    upeph = rpar['gray_pH']
     parlab = ("A: {:.3f}\n".format(upe[0]) +
-            "B: {:.3f}\n".format(upe[1]) +
-            "$C_1$" + ": {:.1f}\n".format(upe[2]) +
-            "$C_2$" + ": {:.3f}\n".format(upe[3]) + 
-    #           "$C_2 (H)$" + ": {:.3f}$\\times 10^6$\n".format(upeph[3] * 1e-6) + 
-            "D: {:.3f}\n".format(upe[4]))
+              "B: {:.3f}\n".format(upe[1]) +
+              "C: {:.1f}\n".format(upe[2]) +
+              "D: {:.3f}\n".format(upe[3]) + 
+              "E: {:.3f}\n".format(upe[3]))
     ax.text(.05, .84, parlab, va='top', ha='left', fontsize=6, color=(.3, .3, .3), transform=ax.transAxes)
 
-    desc = ['culture - white', 'culture - white', 'sed. trap - white', 'culture - pink']
+    desc = ['culture - white (DIC)', 'culture - white ($CO_3$)', 'sed. trap & culture - white', 'culture - pink']
     # axis labels
     for i, ax in enumerate(axs):
         ax.set_xlim(lim)
@@ -732,14 +744,15 @@ def fig5(rd, gray, rmdict, rrdict, rpred, rpar, tstyle):
         ax.text(.125, .935, desc[i], ha='left', va='top', transform=ax.transAxes, weight='bold', style='italic',
                 fontsize=8, color=(.6, .6, .6), zorder=2)
 
-    ax = axs[1]
-    eqnlab = '$Mg/Ca_{foram} = Mg/Ca_{SW}^A\ B\ e^{(C_1\ [Ca]_{SW}\ + C_2\ [CO_3]_{SW} + D) T}$\n'
-    ax.text(.03, .86, eqnlab, va='top', ha='left', fontsize=7, color=(.15, .15, .15), transform=ax.transAxes)
-    
-    ax = axs[3]
-    eqnlab = '$Mg/Ca_{foram} = P\ e^{(C_1\ [Ca]_{SW}\ + C_2\ [CO_3]_{SW} + D) T}$\n'
+    # equation labels
+    ax = axs[0]
+    eqnlab = '$Mg/Ca_{foram} = Mg/Ca_{SW}^A\ DIC^B\ e^{C\ [Ca]_{SW} + D T + E}$\n'
     ax.text(.03, .86, eqnlab, va='top', ha='left', fontsize=7, color=(.15, .15, .15), transform=ax.transAxes)
 
+    ax = axs[1]
+    eqnlab = '$Mg/Ca_{foram} = Mg/Ca_{SW}^A\ [CO_3]^B\ e^{C\ [Ca]_{SW} + D T + E}$\n'
+    ax.text(.03, .86, eqnlab, va='top', ha='left', fontsize=7, color=(.15, .15, .15), transform=ax.transAxes)
+    
     fig.tight_layout(h_pad=0.01)
 
     for i, p in zip([1,3], ['white', 'pink']):
@@ -747,7 +760,7 @@ def fig5(rd, gray, rmdict, rrdict, rpred, rpar, tstyle):
         
     # CO3 colour scale
     pos = axs[0].get_position()
-    cbax = fig.add_axes([pos.x1 - pos.width * 0.45, pos.y0 + pos.height * 0.15,
+    cbax = fig.add_axes([pos.x1 - pos.width * 0.45, pos.y0 + pos.height * 0.11,
                         pos.width * 0.4, pos.height * 0.05])
     fig.colorbar(cb, cax=cbax, orientation='horizontal', ticks=[100, 300, 500], label='$[CO_3^{2-}]$')
     cbax.xaxis.set_label_position('top')
@@ -762,7 +775,7 @@ def fig5(rd, gray, rmdict, rrdict, rpred, rpar, tstyle):
 
     return fig, axs
 
-def fig5_pH(rd, gray, rmdict, rrdict, rpred, rpar, tstyle):
+def fig7_pH(rd, gray, rmdict, rrdict, rpred, rpar, tstyle):
     fig, axs = plt.subplots(2, 2, figsize=[6, 6], sharey=True, sharex=True)
 
     axs = axs.flatten()
@@ -786,7 +799,8 @@ def fig5_pH(rd, gray, rmdict, rrdict, rpred, rpar, tstyle):
                     xerr=d.loc[d.who == w, 'Mg/Caf 2se'], lw=0, elinewidth=1, color=(0,0,0,0.3), zorder=-1)
 
 
-    for i, t in zip([1, 3], ['white', 'pink']):
+    # draw H fits
+    for i, t, ylab in zip([1, 3], ['white', 'pink'], [0.76, 0.84]):
         ax = axs[i]
         d = rd.loc[rd.Type == t]
         
@@ -800,45 +814,44 @@ def fig5_pH(rd, gray, rmdict, rrdict, rpred, rpar, tstyle):
         
         ax.legend(fontsize=7, loc='lower right', framealpha=0.2, borderpad=0.3)
         
-        upe = rpar[t]
         upeph = rpar[t + '_pH']
         if t == 'white':
             parlab = ("A: {:.3f}\n".format(upeph[0]) +
-                    "B: {:.3f}\n".format(upeph[1]) +
-                    "$C_1$" + ": {:.1f}\n".format(upeph[2]) +
-        #               "$C_2 (CO3)$" + ": {:.3f}\n".format(upeph[3]) + 
-                    "$C_2$" + ": {:.3f}$\\times 10^6$\n".format(upeph[3] * 1e-6) + 
-                    "D: {:.3f}\n".format(upeph[4]))
+                      "B: {:.3f}\n".format(upeph[1]) + 
+                      "C: {:.1f}\n".format(upeph[2]) +
+                      "D: {:.3f}\n".format(upeph[3]) + 
+                      "E: {:.3f}\n".format(upeph[4]))
         else:
-            parlab = ("P: {:.3f}\n".format(upeph[0]) +
-                    "$C_1$" + ": {:.1f}\n".format(upeph[1]) +
-        #               "$C_2 (CO3)$" + ": {:.3f}\n".format(upeph[3]) + 
-                    "$C_2$" + ": {:.3f}$\\times 10^6$\n".format(upeph[2] * 1e-6) + 
-                    "D: {:.3f}\n".format(upeph[3]))
-        y = 0.76
-        # if i == 1:
-        #     y = 0.76
-        # else:
-        #     y = 0.84
-        ax.text(.03, y, parlab, va='top', ha='left', fontsize=6, color=(.3, .3, .3), transform=ax.transAxes)
+            parlab = ("B: {:.3f}\n".format(upeph[0]) + 
+                      "C: {:.1f}\n".format(upeph[1]) +
+                      "D: {:.3f}\n".format(upeph[2]) +
+                      "E: {:.3f}\n".format(upeph[3])) 
+
+        ax.text(.03, ylab, parlab, va='top', ha='left', fontsize=6, color=(.3, .3, .3), transform=ax.transAxes)
         
     # Gray data
     ax = axs[2]
-    ax.scatter(gray.loc[:, 'G. ruber w Mg/Ca [mmol/mol]'], nom(rpred['gray_pH']), 
+    ax.scatter(gray.loc[:, 'G. ruber w Mg/Ca [mmol/mol]'], nom(rpred['gray_pH'][:gray.shape[0]]), 
             marker='.', label='Gray et al. (2018)', s=15, **tstyle['white'], alpha=0.6)
     ax.legend(fontsize=7, loc='lower right', framealpha=0.2, borderpad=0.3)
 
-    upe = rpar['gray']
-    upeph = rpar['gray_pH']
-    parlab = ("A: {:.3f}\n".format(upeph[0]) +
-            "B: {:.3f}\n".format(upeph[1]) +
-            "$C_1$" + ": {:.1f}\n".format(upeph[2]) +
-    #           "$C_2 (CO3)$" + ": {:.3f}\n".format(upeph[3]) + 
-            "$C_2$" + ": {:.3f}$\\times 10^6$\n".format(upeph[3] * 1e-6) + 
-            "D: {:.3f}\n".format(upeph[4]))
+    d = rd.loc[rd.Type == 'white']
+    for w in d.who.unique():
+        x = d.loc[d.who == w, 'Mg/Caf']
+        y = rpred['gray_pH'][gray.shape[0]:][d.who == w]
+        ax.scatter(x, nom(y), marker=rmdict[w], label=rrdict[w], s=15, **tstyle['white'])
+        
+        ax.errorbar(x, nom(y), yerr=err(y), xerr=d.loc[d.who == w, 'Mg/Caf 2se'], lw=0, elinewidth=1, color=(0,0,0,0.3), zorder=-1)
+
+    upe = rpar['gray_pH']
+    parlab = ("A: {:.3f}\n".format(upe[0]) +
+              "B: {:.3f}\n".format(upe[1]) +
+              "C: {:.1f}\n".format(upe[2]) +
+              "D: {:.3f}\n".format(upe[3]) + 
+              "E: {:.3f}\n".format(upe[3]))
     ax.text(.05, .84, parlab, va='top', ha='left', fontsize=6, color=(.3, .3, .3), transform=ax.transAxes)
 
-    desc = ['culture - white', 'culture - white', 'sed. trap - white', 'culture - pink']
+    desc = ['culture - white (DIC)', 'culture - white ([$H^+$])', 'sed. trap & culture - white', 'culture - pink']
     # axis labels
     for i, ax in enumerate(axs):
         ax.set_xlim(lim)
@@ -854,14 +867,14 @@ def fig5_pH(rd, gray, rmdict, rrdict, rpred, rpar, tstyle):
         ax.text(.125, .935, desc[i], ha='left', va='top', transform=ax.transAxes, weight='bold', style='italic',
                 fontsize=8, color=(.6, .6, .6), zorder=2)
 
-    ax = axs[1]
-    eqnlab = '$Mg/Ca_{foram} = Mg/Ca_{SW}^A\ B\ e^{(C_1\ [Ca]_{SW}\ + C_2\ [CO_3]_{SW} + D) T}$\n'
-    ax.text(.03, .86, eqnlab, va='top', ha='left', fontsize=7, color=(.15, .15, .15), transform=ax.transAxes)
-    
-    ax = axs[3]
-    eqnlab = '$Mg/Ca_{foram} = P\ e^{(C_1\ [Ca]_{SW}\ + C_2\ [CO_3]_{SW} + D) T}$\n'
+
+    ax = axs[0]
+    eqnlab = '$Mg/Ca_{foram} = Mg/Ca_{SW}^A\ DIC^B\ e^{C\ [Ca]_{SW} + D T + E}$\n'
     ax.text(.03, .86, eqnlab, va='top', ha='left', fontsize=7, color=(.15, .15, .15), transform=ax.transAxes)
 
+    ax = axs[1]
+    eqnlab = '$Mg/Ca_{foram} = Mg/Ca_{SW}^A\ [H^+]^B\ e^{C\ [Ca]_{SW} + D T + E}$\n'
+    ax.text(.03, .86, eqnlab, va='top', ha='left', fontsize=7, color=(.15, .15, .15), transform=ax.transAxes)
         
     fig.tight_layout(h_pad=0.01)
 
@@ -870,7 +883,7 @@ def fig5_pH(rd, gray, rmdict, rrdict, rpred, rpar, tstyle):
         
     # CO3 colour scale
     pos = axs[0].get_position()
-    cbax = fig.add_axes([pos.x1 - pos.width * 0.45, pos.y0 + pos.height * 0.15,
+    cbax = fig.add_axes([pos.x1 - pos.width * 0.45, pos.y0 + pos.height * 0.11,
                         pos.width * 0.4, pos.height * 0.05])
     fig.colorbar(cb, cax=cbax, orientation='horizontal', ticks=[7.5, 8, 8.5], label='$pH_{Total}$')
     cbax.xaxis.set_label_position('top')
@@ -885,9 +898,120 @@ def fig5_pH(rd, gray, rmdict, rrdict, rpred, rpar, tstyle):
 
     return fig, axs
 
-# code for figure 6 is in online supplement
+def fig6(raw, mgca_fn_u, params, idx_exclude, mdict, standard_x):
+    rx = (raw.loc[:, ('Measured', 'Mg/Casw')],  # molar ratio (unitless)
+          raw.loc[:, ('csys_mid', 'DIC')] * 1e-6,  # molar
+          raw.loc[:, ('Measured', '[Ca]sw')] * 1e-3,  # molar
+          raw.loc[:, ('Measured', 'Temp')])  # celcius
+    xpars = np.array(['$Mg/Ca_{SW}$', '$DIC\ (\mu mol\ kg^{-1})$', '$[Ca]_{SW}\ (mmol\ kg^{-1})$', 'Temperature ($^{\circ}$C)'])
+    ms = [1, 1e6, 1e3, 1]
+    y = raw.loc[:, ('Measured', 'Mg/Caf')]
+    ye = raw.loc[:, ('Uncertainties', 'CI95')]
 
-def fig7(xn, yn_ca, yn_mgca, ref_ca, ref_mg, yr_mgca, xr_mgca, MgCa_CC, mx, my, dca):
+    ypred = nom(mgca_fn_u(rx, *params))
+
+    fig, axs = plt.subplots(2, 4, figsize=[9, 4.5], sharey=True)
+    axs = axs.ravel()
+
+    ci_95_m = stats.t.interval(0.95, df=len(y) - len(params))[-1]
+    ci_68_m = stats.t.interval(0.68, df=len(y) - len(params))[-1]
+
+    # pHind = raw.Measured.who.isin(['Lea', 'Allen', 'Hönisch'])
+    pHind = idx_exclude
+    edgecolour = (.3,.3,.3)
+
+    for i in range(len(rx)):
+        p = xpars[i]
+        xt = standard_x.copy()
+        xt[i] = rx[i]
+        yt = y - ypred + nom(mgca_fn_u(xt, *params))
+
+        ax = axs[i]
+        for who in raw.Measured.who.unique():
+            wind = raw.Measured.who == who
+
+            ax.scatter(xt[i][~pHind & wind] * ms[i], yt[~pHind & wind], s=raw.loc[~pHind & wind, ('Measured', 'numberforams')], 
+                    marker=mdict[who], color='C0', edgecolor=edgecolour, lw=0.5, zorder=1)
+            ax.errorbar(xt[i][~pHind & wind] * ms[i], yt[~pHind & wind], ye[~pHind & wind], zorder=-1, lw=0, elinewidth=0.5, alpha=0.3, c='k')
+            
+            ax.scatter(xt[i][pHind& wind] * ms[i], yt[pHind & wind], s=raw.loc[pHind & wind, ('Measured', 'numberforams')], 
+                    marker=mdict[who], color='C1', edgecolor=edgecolour, lw=0.5, zorder=2)
+            ax.errorbar(xt[i][pHind & wind] * ms[i], yt[pHind & wind], ye[pHind & wind], zorder=-1, lw=0, elinewidth=0.5, alpha=0.3, c=(.4,.4,.4))
+        ax.set_xlabel(p)
+        
+        # predicted line
+        lim = ax.get_xlim()
+        ax.set_xlim()
+        xnew = np.linspace(*lim, 100) / ms[i]
+        xn = standard_x.copy()
+        xn[i] = xnew
+        yn = mgca_fn_u(xn, *params)
+        
+        ax.plot(xnew * ms[i], nom(yn), alpha=0.6, label='Model', zorder=-1)
+        ax.fill_between(xnew * ms[i], nom(yn) + err(yn) * ci_68_m, nom(yn) - err(yn) * ci_68_m, alpha=0.2, color='C0', label='68% CI', zorder=-2)
+        ax.fill_between(xnew * ms[i], nom(yn) + err(yn) * ci_95_m, nom(yn) - err(yn) * ci_95_m, alpha=0.1, color='C0', label='95% CI', zorder=-2)
+
+    # other variables
+    ovars = [('Measured', 'Salinity'), ('csys_mid', 'pHtot'), ('csys_mid', 'CO3'), ('Measured', '[Mg]sw')]
+    xlabels = ['Salinity', '$pH_{Total}$', '$[CO_3^{2-}]\ (\mu mol\ kg^{-1})$', '$[Mg]_{SW}\ (mmol\ kg^{-1})$']
+    yt = y - ypred + nom(mgca_fn_u(standard_x, *params))
+    pred_standard = mgca_fn_u(standard_x, *params)
+    r = yt - nom(pred_standard)
+    zero = stats.ttest_1samp(r, 0)
+    norm = stats.normaltest(r) 
+
+    for var, ax, xlab in zip(ovars, axs[-4:], xlabels):
+        vx = raw.loc[:, var].values
+        for who in raw.Measured.who.unique():
+            wind = raw.Measured.who == who
+            ax.scatter(vx[~pHind & wind], yt[~pHind & wind], s=raw.loc[~pHind & wind, ('Measured', 'numberforams')], 
+                    marker=mdict[who], color='C0', edgecolor=edgecolour, lw=0.5)
+            ax.errorbar(vx[~pHind & wind], yt[~pHind & wind], ye[~pHind & wind], zorder=-1, lw=0, elinewidth=0.5, alpha=0.3, c='k')
+            
+            ax.scatter(vx[pHind & wind], yt[pHind & wind], s=raw.loc[pHind & wind, ('Measured', 'numberforams')], 
+                    marker=mdict[who], color='C1', edgecolor=edgecolour, lw=0.5)
+            ax.errorbar(vx[pHind & wind], yt[pHind & wind], ye[pHind & wind], zorder=-1, lw=0, elinewidth=0.5, alpha=0.3, c='k')
+        ax.set_xlabel(xlab)
+        
+        slope = stats.spearmanr(vx, r)
+        fit = LinearRegression().fit(vx.reshape(-1, 1), yt.values.reshape(-1, 1))
+        xlim = np.array(ax.get_xlim()).reshape(-1, 1)
+        ax.set_xlim(xlim)
+        ax.plot(xlim, fit.predict(xlim), ls='dashed', color='k', alpha=0.6, zorder=2)
+        if abs(fit.coef_[0,0]) < 0.01:
+            fmt_str = '2e'
+        else:
+            fmt_str = '2f'
+        rstats = ("Slope: {:." + fmt_str + "} (p={:.2f})").format(fit.coef_[0,0], slope.pvalue)
+        if var[-1] == 'Salinity':
+            rstats += '\nRes. Mean: {:.2f} (p={:.2f})\nRes. Std: {:.2f} (Normal, p={:.2f})'.format(np.mean(r), zero.pvalue, np.std(r), norm.pvalue)
+        ax.text(.03, .02, rstats,
+                transform=ax.transAxes, ha='left', va='bottom', fontsize=6, c=(.2,.2,.2))
+        ax.set_ylim(0, 15)
+        
+        ax.axhline(nom(pred_standard), c='C0', zorder=-1)
+        ax.axhspan(nom(pred_standard) + err(pred_standard) * ci_68_m, nom(pred_standard) - err(pred_standard) * ci_68_m, alpha=0.2, color='C0', zorder=-2)
+        ax.axhspan(nom(pred_standard) + err(pred_standard) * ci_95_m, nom(pred_standard) - err(pred_standard) * ci_95_m, alpha=0.1, color='C0', zorder=-2)
+        
+    for ax, letter in zip(axs.flat, 'ABCDEFGH'):
+        ax.text(.03, .97, letter, ha='left', va='top', transform=ax.transAxes, 
+                fontsize=12, weight='bold', color=(.3,.3,.3), zorder=2)
+
+    axs[0].set_ylabel('Mg/Ca$_{\it{O. universa}}$ (mmol mol$^{-1}$)')
+    axs[4].set_ylabel('Mg/Ca$_{\it{O. universa}}$ (mmol mol$^{-1}$)')
+
+    ax = axs[2]
+    ax.scatter([],[],c='C0', label='Included Data', s=10)
+    ax.scatter([],[],c='C1', label='Excluded Data', s=10)
+    handles, labels = ax.get_legend_handles_labels()
+    order = [-2, -1, 0, 1, 2]
+    ax.legend([handles[o] for o in order], [labels[o] for o in order], fontsize=6)
+
+    fig.tight_layout()
+
+    return fig
+
+def fig9(xn, yn_ca, yn_mgca, ref_ca, ref_mg, yr_mgca, xr_mgca, MgCa_CC, mx, my, dca):
     m = ['o', 'v', '^', '<', '>', '_', '|', '+', 'x', 's', 'D', '*']
     rs = np.unique(np.concatenate([ref_mg, ref_ca]))
     mdict = {r: m for r, m in zip(rs, m[:len(rs)])}
@@ -1066,7 +1190,7 @@ def fig8(params):
 
     axs[0].set_xlabel('$\sigma\ Mg/Ca_{SW}\ (mol\ mol^{-1})$')
     axs[1].set_xlabel('$\sigma\ [Ca]_{SW}\ (mmol\ kg^{-1})$')
-    axs[2].set_xlabel('$\sigma\ [DIC]_{SW}\ (\mu mol\ kg^{-1})$')
+    axs[2].set_xlabel('$\sigma\ DIC\ (\mu mol\ kg^{-1})$')
     axs[3].set_xlabel('$\sigma\ Mg/Ca_{\it{O. universa}}\ (mmol\ mol^{-1})$')
 
     #legend

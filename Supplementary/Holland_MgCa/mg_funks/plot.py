@@ -1,5 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.colors as mc
+import colorsys
 
 from scipy import stats
 from scipy.optimize import curve_fit
@@ -10,6 +12,11 @@ from uncertainties.unumpy import std_devs as err
 from cbsyst import Csys
 
 from .helpers import isolate_constant_conditions
+
+def calc_R2(pred, obs):
+    SSres = np.nansum((pred - obs)**2)
+    SStot = np.nansum((obs - np.nanmean(obs))**2)
+    return 1 - SSres / SStot
 
 def spreadm(x, y, x_tol, y_tol, x_offset=None, y_offset=None, offset_mult=0.2):
     """
@@ -67,7 +74,7 @@ def spreadm(x, y, x_tol, y_tol, x_offset=None, y_offset=None, offset_mult=0.2):
     else:
         return x, y, None, None
 
-def compare(obs, pred, errs=None, c=None, clab=None, cmap=None, figax=None, show_rmsd=False, **kwargs):
+def compare(obs, pred, errs=None, c=None, clab=None, cmap=None, figax=None, show_stats=True, **kwargs):
     
     if figax is None:
         fig, ax = plt.subplots(1,1)
@@ -98,10 +105,11 @@ def compare(obs, pred, errs=None, c=None, clab=None, cmap=None, figax=None, show
     #     err = np.percentile(errs, 50)
     #     ax.fill_between(lims, lims+err, lims-err, color=(0,0,0,0.2), lw=0, zorder=-5)
 
-    if show_rmsd:
+    if show_stats:
         rmsd = np.sqrt(np.sum((obs - pred)**2) / len(pred))
-        ax.text(.05,.95,'RMSD: {:.2f}'.format(rmsd),
-                ha='left', va='top', transform=ax.transAxes)
+        R2 = calc_R2(pred, obs)
+        ax.text(.05,.95,'RMSD: {:.2f}\n$R^2$: {:.2f}'.format(rmsd, R2),
+                ha='left', va='top', transform=ax.transAxes, alpha=0.7, fontsize=10)
 
     if figax is None:
         return fig, ax
@@ -224,14 +232,14 @@ def subset_trendline(ax, sub, xvar, color, line_order, yvar=('Measured', 'Mg/Caf
     y = sub.loc[:, yvar]
     
     p = np.polyfit(x, y, line_order)
-    xnew = np.linspace(x.min() - x.ptp() * xpad, x.max() + x.ptp() * xpad, 20)
+    xnew = np.linspace(x.min() - np.ptp(x) * xpad, x.max() + np.ptp(x) * xpad, 20)
     ax.plot(xnew, np.polyval(p, xnew), color=color, alpha=0.3, zorder=-2, **lsargs)
     
     if label is not None:
         dx = np.ptp(xnew) * 0.1
 
         if label_x > xnew.max():
-            label_x_draw = xnew.max() + xnew.ptp() * 0.05
+            label_x_draw = xnew.max() + np.ptp(xnew) * 0.05
             label_x = xnew.max() - dx
             yoffset = 0
         else:
@@ -270,3 +278,19 @@ def emphasise_subset(ax, sub, xvar, color, m, s=None, yvar=('Measured', 'Mg/Caf'
     
     ax.scatter(x, y, marker=m, s=s, color=color, lw=0.5, edgecolor='k')
     
+def lighten_color(color, amount=0.5):
+    """
+    Lightens the given color by multiplying (1-luminosity) by the given amount.
+    Input can be matplotlib color string, hex string, or RGB tuple.
+
+    Examples:
+    >> lighten_color('g', 0.3)
+    >> lighten_color('#F034A3', 0.6)
+    >> lighten_color((.3,.55,.1), 0.5)
+    """
+    try:
+        c = mc.cnames[color]
+    except:
+        c = color
+    c = colorsys.rgb_to_hls(*mc.to_rgb(c))
+    return colorsys.hls_to_rgb(c[0], 1 - amount * (1 - c[1]), c[2])
