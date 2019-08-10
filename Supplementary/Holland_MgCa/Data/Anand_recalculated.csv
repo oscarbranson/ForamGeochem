@@ -1,16 +1,18 @@
 # Anand et al 2003 Supplementary Table *with derived calculations*
 # Modifications from original table:
 #    - dmin and dmax: species-specific depth ranges from Anand Table 2 
-#    - temp and sal: depth-range specific temperature and salinity data from
+#    - sal: depth-range specific salinity data from
 #      Bermuda biological station S (http://batsftp.bios.edu/Hydrostation_S/bottle/)
-#      calculated as the mean temp and sal of bottle data from between the
-#      min and max depths, or (when no data existed) the temp and sal from the 
+#      calculated as the mea sal of bottle data from between the
+#      min and max depths, or (when no data existed) sal from the 
 #      bottle closest to the min and max depths, on Anand's listed sampling date.
 #    - sal_mid, sal_max, sal_min: Salinities at minimum, maximum and mid depth
 #      range points estimated from 2D polynomial fit of Station S salinity data.
-#      Error (±0.15 psu) is 2sigma calculated from residuals of polynomial fit to data.#    - sal: mean of sal_min, sal_mid and sal_max. Used in d18Ow and calcT.#    - d18Ow: delta 18O water, calculated using Eq 1. in Anand et al (2003)
+#      Error (±0.15 psu) is 2sigma calculated from residuals of polynomial fit to data.
+#    - sal: mean of sal_min, sal_mid and sal_max. Used in d18Ow and calcT.
+#    - d18Ow: delta 18O water, calculated using Eq 1. in Anand et al (2003)
 #      (d18Ow = -19.264 + 0.558 * sal)
-#    - calcT: calcification temperature, calculated using Eq. 3 from Anand et al
+#    - Ctemp: calcification temperature, calculated using Eq. 3 from Anand et al
 #      (16.9 - 4.38 * (d18Oc - (d18Ow - 0.27)) + 0.1 * (d18Oc - (d18Ow - 0.27))**2)
 #
 Species,Date,Size fraction (um),Mg/Ca (mmol/mol),d18O (per mil),dmin,dmax,ddate,sal_min,sal_max,sal_mid,sal,d18Ow,Ctemp
