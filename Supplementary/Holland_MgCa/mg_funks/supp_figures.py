@@ -1,6 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.patches import Polygon
 
+from pandas import IndexSlice as idx
 from scipy import stats
 from scipy.optimize import curve_fit
 import uncertainties as un
@@ -12,17 +14,19 @@ from cbsyst import Csys
 from .helpers import isolate_constant_conditions
 from .plot import spreadm, angle_of_line
 
+plt.rcParams['axes.labelsize'] = 'small'
+
 # Code for making supplementary Figures
 #######################################
 
-def Figure_SX(raw, dat, mdict, ldict):
+def carb_chem(raw, dat, mdict, ldict):
     fig, ax = plt.subplots(1, 1)
 
     vlim = dat.loc[:, ('csys_mid', 'DIC')].min(), dat.loc[:, ('csys_mid', 'DIC')].max()
 
     for who in mdict.keys():
         ind = raw.Measured.who == who
-        if who not in ['This Study', 'Haynes (subm)', 'Russell', 'Spero']:
+        if who not in ['This Study']:
             s = 25
             z = -1
             c = 'C3'
@@ -56,11 +60,11 @@ def Figure_SX(raw, dat, mdict, ldict):
         
         ind = (line[0].get_xdata() < ax.get_xlim()[1]) & (line[0].get_ydata() < ax.get_ylim()[1])
         
-        x = line[0].get_xdata()[ind][-2:]
-        y = line[0].get_ydata()[ind][-2:]
+        x = line[0].get_xdata()[ind][-4:]
+        y = line[0].get_ydata()[ind][-4:]
         angle = angle_of_line(x, y, ax)
         
-        ax.text(x[0], y[0] + 0.01, 'DIC: {:.0f}'.format(DIC), rotation=angle, ha='right', alpha=0.4)
+        ax.text(x[0], y[0], 'DIC: {:.0f}'.format(DIC), rotation=angle, ha='center', alpha=0.4)
         
     return fig, ax
 
@@ -180,3 +184,64 @@ def add_vs_mult(dat, crossplots):
     crossplots['Ca_DIC'] = (X, Y, ca_dic_fn((X, Y), *p), sub.loc[:, ('Measured', '[Ca]sw')], sub.loc[:, ('csys_mid', 'DIC')], sub.loc[:, ('Measured', 'D_Mg')])
 
     return fig, axs, crossplots
+
+def C_speciation(raw):
+    fig, ax = plt.subplots(1, 1)
+
+    xvar = 'pHtot'
+    yvar = 'CO3'
+
+    # colors
+    cvar = '[Mg]sw'
+    ambient = 52
+    cmap = plt.cm.RdBu
+
+    xs = raw.loc[:, idx[['pitzer', 'MyAMI'], xvar]]
+    ys = raw.loc[:, idx[['pitzer', 'MyAMI'], yvar]]
+
+    pad = 0.05
+    xmin = np.nanmin(xs.values)
+    xmax = np.nanmax(xs.values)
+    xran = xmax - xmin
+    xlim = (xmin - pad * xran, xmax + pad * xran)
+
+    ymin = np.nanmin(ys.values)
+    ymay = np.nanmax(ys.values)
+    yran = ymay - ymin
+    ylim = (ymin - pad * yran, ymay + pad * yran)
+
+    for i, r in raw.iterrows():
+        cv = ((r.loc[('Measured', cvar)] - ambient) / np.max(abs(raw.loc[:, ('Measured', cvar)] - ambient)) + 1) / 2
+        c = list(cmap(cv))
+        c[-1] = 0.7
+        
+        xp = r.loc[('pitzer', xvar)]
+        xm = r.loc[('MyAMI', xvar)]
+        yp = r.loc[('pitzer', yvar)]
+        ym = r.loc[('MyAMI', yvar)]
+        
+        x = [xp, xm, xm, xp]
+        y = [yp, yp, ym, ym]
+        
+        p = Polygon(np.vstack([x, y]).T, facecolor=c, lw=0.5, edgecolor=(0,0,0,0.8))
+        
+        ax.add_patch(p)
+        
+    ax.set_xlim(xlim)
+    ax.set_ylim(ylim)
+
+    ax.set_xlabel('$pH_{Total}$')
+    ax.set_ylabel('$[CO_3]\ (\mu mol\ kg^{-1})$')
+
+    fig.subplots_adjust(right=0.8)
+    pos = ax.get_position()
+    cax = fig.add_axes([.82, pos.y0, 0.03, pos.height])
+    cax.yaxis.tick_right()
+
+    xs, ys = np.meshgrid([0,1], np.linspace(raw.loc[:, ('Measured', cvar)].min(), raw.loc[:, ('Measured', cvar)].max(), 50))
+    cax.pcolormesh(xs,ys,ys, cmap=cmap)
+    cax.set_ylabel('$[Mg]_{SW}\ (mmol\ kg^{-1})$')
+    cax.yaxis.set_label_position('right')
+    cax.xaxis.set_visible(False)
+
+    return fig

@@ -74,7 +74,7 @@ def spreadm(x, y, x_tol, y_tol, x_offset=None, y_offset=None, offset_mult=0.2):
     else:
         return x, y, None, None
 
-def compare(obs, pred, errs=None, c=None, clab=None, cmap=None, figax=None, show_stats=True, **kwargs):
+def compare(obs, pred, errs=None, c=None, clab=None, cmap=None, figax=None, show_stats=True, cbar=True, **kwargs):
     
     if figax is None:
         fig, ax = plt.subplots(1,1)
@@ -89,7 +89,7 @@ def compare(obs, pred, errs=None, c=None, clab=None, cmap=None, figax=None, show
 
     ax.set_xlabel('Measured')
     ax.set_ylabel('Predicted')
-    if c is not None:
+    if c is not None and cbar:
         if figax is None:
             fig.colorbar(m, label=clab)
         else:
