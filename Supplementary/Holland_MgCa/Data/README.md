@@ -10,6 +10,9 @@
 - [MonteCarloOutput.npy](Supplementary/Holland_MgCa/Data/MonteCarloOutput.npy): Optimised parameters from Monte-Carlo uncertainty analysis. In numpy data format. 
 - [MonteCarloOutput_allData.npy](Supplementary/Holland_MgCa/Data/MonteCarloOutput_allData.npy): Optimised parameters from Monte-Carlo uncertainty analysis include *all* published data. In numpy data format.
 
+### Methods
+- [Seawater_Recipe.xlsx](Supplementary/Holland_MgCa/Data/Seawater_Recipe.xlsx): Recipe for artificial seawater used in culturing.
+
 ### *G. ruber* Data
 - [Gray_2018_Gruber.tab](Supplementary/Holland_MgCa/Data/Gray_2018_Gruber.tab): Sediment trap *G. ruber* data from Gray et al. 2018.
 
