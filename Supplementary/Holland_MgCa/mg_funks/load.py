@@ -38,52 +38,52 @@ def mg_data(excel_file, species=None):
     return d.loc[ind, :].apply(pd.to_numeric, errors='ignore')
 
 def calc_myami_Csys(dat):
-    cols = ['pHtot_out', 'DIC_out', 'HCO3_out', 'CO3_out', 'TA_out']
+    cols = ['pHtot', 'DIC', 'HCO3', 'CO3', 'TA']
 
     dic = dat.loc[:, 'DIC'].copy()
     # pHNBS and DIC
     ind = ~np.isnan(dat.loc[:, 'pHNBS']) & ~np.isnan(dic)
     if any(ind):
         cs = cb.Csys(pHNBS=dat.loc[ind, 'pHNBS'], DIC=dic.loc[ind], BT=dat.loc[ind, 'B umol/kg'],
-                     Ca=dat.loc[ind, '[Ca]sw'] * 1e-3, Mg=dat.loc[ind, '[Mg]sw'] * 1e-3, T_in=25., T_out=dat.loc[ind, 'Temp'],
+                     Ca=dat.loc[ind, '[Ca]sw'] * 1e-3, Mg=dat.loc[ind, '[Mg]sw'] * 1e-3, T_in=dat.loc[ind, 'Temp'],
                      S_in=dat.loc[ind, 'Salinity'],)
 
         for c in cols:
             dat.loc[ind, c.replace('_out', '')] = cs[c]
-            dat.loc[ind, 'omega'] = cs.CO3_out * 1e-6 * cs.Ca / cs.Ks.KspC
+            dat.loc[ind, 'omega'] = cs.CO3 * 1e-6 * cs.Ca / cs.Ks.KspC
     
     # pHTOT and DIC
     ind = ~np.isnan(dat.loc[:, 'pHTOTAL']) & ~np.isnan(dic)
     if any(ind):
         cs = cb.Csys(pHtot=dat.loc[ind, 'pHTOTAL'], DIC=dic.loc[ind], BT=dat.loc[ind, 'B umol/kg'],
-                     Ca=dat.loc[ind, '[Ca]sw'] * 1e-3, Mg=dat.loc[ind, '[Mg]sw'] * 1e-3, T_in=25., T_out=dat.loc[ind, 'Temp'],
+                     Ca=dat.loc[ind, '[Ca]sw'] * 1e-3, Mg=dat.loc[ind, '[Mg]sw'] * 1e-3, T_in=dat.loc[ind, 'Temp'],
                      S_in=dat.loc[ind, 'Salinity'],)
 
         for c in cols:
             dat.loc[ind, c.replace('_out', '')] = cs[c]
-            dat.loc[ind, 'omega'] = cs.CO3_out * 1e-6 * cs.Ca / cs.Ks.KspC
+            dat.loc[ind, 'omega'] = cs.CO3 * 1e-6 * cs.Ca / cs.Ks.KspC
 
     # pHTOT and TA
     ind = ~np.isnan(dat.loc[:, 'pHTOTAL']) & ~np.isnan(dat.loc[:, 'Alk'])
     if any(ind):
         cs = cb.Csys(pHtot=dat.loc[ind, 'pHTOTAL'], TA=dat.loc[ind, 'Alk'], BT=dat.loc[ind, 'B umol/kg'],
-                     Ca=dat.loc[ind, '[Ca]sw'] * 1e-3, Mg=dat.loc[ind, '[Mg]sw'] * 1e-3, T_in=25., T_out=dat.loc[ind, 'Temp'],
+                     Ca=dat.loc[ind, '[Ca]sw'] * 1e-3, Mg=dat.loc[ind, '[Mg]sw'] * 1e-3, T_in=dat.loc[ind, 'Temp'],
                      S_in=dat.loc[ind, 'Salinity'],)
 
         for c in cols:
             dat.loc[ind, c.replace('_out', '')] = cs[c]
-            dat.loc[ind, 'omega'] = cs.CO3_out * 1e-6 * cs.Ca / cs.Ks.KspC
+            dat.loc[ind, 'omega'] = cs.CO3 * 1e-6 * cs.Ca / cs.Ks.KspC
 
     # pHNBS and TA
     ind = ~np.isnan(dat.loc[:, 'pHNBS']) & ~np.isnan(dat.loc[:, 'Alk'])
     if any(ind):
         cs = cb.Csys(pHNBS=dat.loc[ind, 'pHNBS'], TA=dat.loc[ind, 'Alk'], BT=dat.loc[ind, 'B umol/kg'],
-                     Ca=dat.loc[ind, '[Ca]sw'] * 1e-3, Mg=dat.loc[ind, '[Mg]sw'] * 1e-3, T_in=25., T_out=dat.loc[ind, 'Temp'],
+                     Ca=dat.loc[ind, '[Ca]sw'] * 1e-3, Mg=dat.loc[ind, '[Mg]sw'] * 1e-3, T_in=dat.loc[ind, 'Temp'],
                      S_in=dat.loc[ind, 'Salinity'],)
 
         for c in cols:
             dat.loc[ind, c.replace('_out', '')] = cs[c]
-            dat.loc[ind, 'omega'] = cs.CO3_out * 1e-6 * cs.Ca / cs.Ks.KspC
+            dat.loc[ind, 'omega'] = cs.CO3 * 1e-6 * cs.Ca / cs.Ks.KspC
 
     return dat
 

@@ -27,11 +27,11 @@ def calc_pitzer_Csys(d,
           'Br': 0.84e-3,
           'F': 0.7e-4}
     
-    # calculate ambient Ks at 25C (measurement temperature)
+    # calculate ambient Ks at measurement temperatures
     # =====================================================
     ks = {}
 
-    TempC = 25
+    TempC = d.loc[:, ('Measured', 'pH_Temp')]
     TempK = TempC + 273.15
     Sal = d.loc[:, ('Measured', 'Salinity')]
 
@@ -58,7 +58,7 @@ def calc_pitzer_Csys(d,
         v = v.Measured
         isw.update({'Mg': v.loc['[Mg]sw'] * 1e-3,
                     'Ca': v.loc['[Ca]sw'] * 1e-3,
-                    'Temp': 25,
+                    'Temp': v.loc['pH_Temp'],
                     'B': v.loc['B umol/kg'] * 1e-6})
 
         sal_f = v.Salinity / 35.
@@ -71,7 +71,7 @@ def calc_pitzer_Csys(d,
                 fKs[k] = []
             fKs[k].append(f)
     
-    # apply correction factors to 25C Ks
+    # apply correction factors to measurement temperature Ks
     # ==================================
     cKs = ks.copy()
     for k, f in fKs.items():
@@ -89,9 +89,9 @@ def calc_pitzer_Csys(d,
     ind = d.loc[:, ('Measured', 'pHTOTAL')].isnull()
     d.loc[ind, ('pitzer_25C', 'pHTOTAL')] = pHs['pHtot'][ind]
     
-    # Calculate DIC/Alk at MEASURED conditions (25C)
+    # Calculate DIC/Alk at MEASURED conditions
     # ==============================================
-    # calculate carbon system using 25C Ks, pH and either DIC or Alk
+    # calculate carbon system using measured temp Ks, pH and either DIC or Alk
     carb = cb.Csys(d.loc[:, ('pitzer_25C', 'pHTOTAL')], TA=d.loc[:, ('Measured', 'Alk')], 
                    BT=d.loc[:, ('Measured', 'B umol/kg')], Ks=cKs)
     d.loc[:, ('pitzer_25C', 'DIC')] = carb.DIC
@@ -161,7 +161,7 @@ def calc_MyAMI_Csys(d):
     ind = ~d.loc[:, ('Measured', 'pHNBS')].isnull() & ~d.loc[:, ('Measured', 'Alk')].isnull()
     if any(ind):
         cs = cb.Csys(pHNBS=d.loc[ind, ('Measured', 'pHNBS')], TA=d.loc[ind, ('Measured', 'Alk')],
-                    T_in=25, T_out=d.loc[ind, ('Measured', 'Temp')], S_in=d.loc[ind, ('Measured', 'Salinity')],
+                    T_in=d.loc[ind, ('Measured', 'pH_Temp')], T_out=d.loc[ind, ('Measured', 'Temp')], S_in=d.loc[ind, ('Measured', 'Salinity')],
                     Mg=d.loc[ind, ('Measured', '[Mg]sw')] / 1e3, Ca=d.loc[ind, ('Measured', '[Ca]sw')] / 1e3,
                     BT=d.loc[ind, ('Measured', 'B umol/kg')])
         for c in out_cols:
@@ -172,7 +172,7 @@ def calc_MyAMI_Csys(d):
     ind = ~d.loc[:, ('Measured', 'pHNBS')].isnull() & ~d.loc[:, ('Measured', 'DIC')].isnull()
     if any(ind):
         cs = cb.Csys(pHNBS=d.loc[ind, ('Measured', 'pHNBS')], DIC=d.loc[ind, ('Measured', 'DIC')],
-                    T_in=25, T_out=d.loc[ind, ('Measured', 'Temp')], S_in=d.loc[ind, ('Measured', 'Salinity')],
+                    T_in=d.loc[ind, ('Measured', 'pH_Temp')], T_out=d.loc[ind, ('Measured', 'Temp')], S_in=d.loc[ind, ('Measured', 'Salinity')],
                     Mg=d.loc[ind, ('Measured', '[Mg]sw')] / 1e3, Ca=d.loc[ind, ('Measured', '[Ca]sw')] / 1e3,
                     BT=d.loc[ind, ('Measured', 'B umol/kg')])
         for c in out_cols:
@@ -183,7 +183,7 @@ def calc_MyAMI_Csys(d):
     ind = ~d.loc[:, ('Measured', 'pHTOTAL')].isnull() & ~d.loc[:, ('Measured', 'Alk')].isnull()
     if any(ind):
         cs = cb.Csys(pHtot=d.loc[ind, ('Measured', 'pHTOTAL')], TA=d.loc[ind, ('Measured', 'Alk')],
-                    T_in=25, T_out=d.loc[ind, ('Measured', 'Temp')], S_in=d.loc[ind, ('Measured', 'Salinity')],
+                    T_in=d.loc[ind, ('Measured', 'pH_Temp')], T_out=d.loc[ind, ('Measured', 'Temp')], S_in=d.loc[ind, ('Measured', 'Salinity')],
                     Mg=d.loc[ind, ('Measured', '[Mg]sw')] / 1e3, Ca=d.loc[ind, ('Measured', '[Ca]sw')] / 1e3,
                     BT=d.loc[ind, ('Measured', 'B umol/kg')])
         for c in out_cols:
@@ -194,7 +194,7 @@ def calc_MyAMI_Csys(d):
     ind = ~d.loc[:, ('Measured', 'pHTOTAL')].isnull() & ~d.loc[:, ('Measured', 'DIC')].isnull()
     if any(ind):
         cs = cb.Csys(pHtot=d.loc[ind, ('Measured', 'pHTOTAL')], DIC=d.loc[ind, ('Measured', 'DIC')],
-                    T_in=25, T_out=d.loc[ind, ('Measured', 'Temp')], S_in=d.loc[ind, ('Measured', 'Salinity')],
+                    T_in=d.loc[ind, ('Measured', 'pH_Temp')], T_out=d.loc[ind, ('Measured', 'Temp')], S_in=d.loc[ind, ('Measured', 'Salinity')],
                     Mg=d.loc[ind, ('Measured', '[Mg]sw')] / 1e3, Ca=d.loc[ind, ('Measured', '[Ca]sw')] / 1e3,
                     BT=d.loc[ind, ('Measured', 'B umol/kg')])
         for c in out_cols:
