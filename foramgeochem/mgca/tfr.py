@@ -180,8 +180,8 @@ def holland2018_calc_mgca(temp, mgca_sw=5.17, ca_sw=10.2e-3, carb_sw=2000e-6, p=
     -------
     Foraminiferal Mg/Ca in mmol/mol : array_like
     """
-    A, B, C1, C2, D = p
-    return mgca_sw**A * B * exp((C1 * ca_sw + C2 * carb_sw + D) * temp)
+    A, B, C, D, E = p
+    return mgca_sw**A * carb_sw**B * exp(C * ca_sw + D * temp + E)
 
 def holland2018_calc_temp(mgca, mgca_sw=5.17, ca_sw=10.2e-3, carb_sw=2000e-6, p=None):
     """
@@ -204,8 +204,8 @@ def holland2018_calc_temp(mgca, mgca_sw=5.17, ca_sw=10.2e-3, carb_sw=2000e-6, p=
     -------
     Temperature in Celcius. : array_like
     """
-    A, B, C1, C2, D = p
-    return log(mgca / (mgca_sw**A * B)) / (C1 * ca_sw + C2 * carb_sw + D)
+    A, B, C, D, E = p
+    return (log(mgca / (mgca_sw**A * carb_sw**B)) - ca_sw * C - E) / D
 
 def holland2018_calc_mgca_sw(temp, mgca, ca_sw=10.2e-3, carb_sw=2000e-6, p=None):
     """
@@ -228,8 +228,8 @@ def holland2018_calc_mgca_sw(temp, mgca, ca_sw=10.2e-3, carb_sw=2000e-6, p=None)
     -------
     Seawater Mg/Ca, in mol/mol. : array_like
     """
-    A, B, C1, C2, D = p
-    return (mgca / (B * exp((C1 * ca_sw + C2 * carb_sw + D) * temp)))**(1/A)
+    A, B, C, D, E = p
+    return (mgca / (carb_sw**B * exp(C * ca_sw + D * temp + E)))**(1/A)
 
 def holland2018_calc_carb_sw(temp, mgca, mgca_sw=5.17, ca_sw=10.2e-3, p=None):
     """
@@ -252,8 +252,8 @@ def holland2018_calc_carb_sw(temp, mgca, mgca_sw=5.17, ca_sw=10.2e-3, p=None):
     -------
     Seawater carbon parameter - either DIC, CO3 or pH, depending on the species. : array_like
     """
-    A, B, C1, C2, D = p
-    return (log(mgca / (mgca_sw**A * B)) - temp * (C1 * ca_sw + D)) / (C2 * temp)
+    A, B, C, D, E = p
+    return (mgca / (mgca_sw**A * exp(C * ca_sw + D * temp + E)))**(1/B)
 
 def holland2018_calc_Ca_sw(temp, mgca, mgca_sw=5.17, carb_sw=2000e-6, p=None):
     """
@@ -276,5 +276,5 @@ def holland2018_calc_Ca_sw(temp, mgca, mgca_sw=5.17, carb_sw=2000e-6, p=None):
     -------
     Seawater calcium concentration, in mol kg-1. : array_like
     """
-    A, B, C1, C2, D = p
-    return (log(mgca / (mgca_sw**A * B)) - temp * (C2 * carb_sw + D)) / (C1 * temp)
+    A, B, C, D, E = p
+    return (log(mgca / (mgca_sw**A * carb_sw**B)) - temp * D - E) / C

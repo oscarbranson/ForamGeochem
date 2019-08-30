@@ -74,7 +74,7 @@ def fig1(dat, rus, mdict, ldict):
 
     handles, labels = ax.get_legend_handles_labels()
 
-    leg = ax.legend(handles[-3:] + handles[1:-3] + handles[:1], labels[-3:] + labels[1:-3] + labels[:1], loc='upper left', fontsize=8)
+    leg = ax.legend(handles[-4:] + handles[1:-4] + handles[:1], labels[-4:] + labels[1:-4] + labels[:1], loc='upper left', fontsize=8)
 
     for text in leg.get_texts():
         if '[Mg]' in text.get_text():
@@ -149,21 +149,21 @@ def fig2(dat, mdict, ldict):
         # Variable Temperature
         ax = axs[0,0]
         ax.scatter(sub.loc[:, ('Measured', 'Temp')], sub.loc[:, ('Measured', 'Mg/Caf')],
-                s=sub.loc[:, ('Measured', 'numberforams')], marker=m, color=(0,0,0,0.1), lw=0)
+                   s=sub.loc[:, ('Measured', 'numberforams')], marker=m, color=(0,0,0,0.1), lw=0)
         ax.set_xlim(ax.get_xlim())
         ax.set_xlabel('Temperature ($^{\circ}C$)')
         
         # Variable DIC
         ax = axs[0,1]
         ax.scatter(sub.loc[:, ('csys_mid', 'DIC')], sub.loc[:, ('Measured', 'Mg/Caf')],
-                s=sub.loc[:, ('Measured', 'numberforams')], marker=m, color=(0,0,0,0.2), lw=0)
+                   s=sub.loc[:, ('Measured', 'numberforams')], marker=m, color=(0,0,0,0.2), lw=0)
         ax.set_xlim(ax.get_xlim())
         ax.set_xlabel('DIC ($\mu mol\ kg^{-1}$)')
 
         # Variable pH
         ax = axs[0,2]
         ax.scatter(sub.loc[:, ('csys_mid', 'pHtot')], sub.loc[:, ('Measured', 'Mg/Caf')],
-                s=sub.loc[:, ('Measured', 'numberforams')], marker=m, color=(0,0,0,0.2), lw=0)
+                   s=sub.loc[:, ('Measured', 'numberforams')], marker=m, color=(0,0,0,0.2), lw=0)
         ax.set_xlim(ax.get_xlim())
         ax.set_xlabel('pH (Total)')
 
@@ -171,21 +171,21 @@ def fig2(dat, mdict, ldict):
         # Variable Mg
         ax = axs[1,0]
         ax.scatter(sub.loc[:, ('Measured', '[Mg]sw')], sub.loc[:, ('Measured', 'Mg/Caf')],
-                s=sub.loc[:, ('Measured', 'numberforams')], marker=m, color=(0,0,0,0.2), lw=0)
+                   s=sub.loc[:, ('Measured', 'numberforams')], marker=m, color=(0,0,0,0.2), lw=0)
         ax.set_xlim(ax.get_xlim())
         ax.set_xlabel('$[Mg]_{SW}\ (mmol\ kg^{-1})$')
 
         # Variable Ca
         ax = axs[1,1]
         ax.scatter(sub.loc[:, ('Measured', '[Ca]sw')], sub.loc[:, ('Measured', 'Mg/Caf')],
-                s=sub.loc[:, ('Measured', 'numberforams')], marker=m, color=(0,0,0,0.2), lw=0)
+                   s=sub.loc[:, ('Measured', 'numberforams')], marker=m, color=(0,0,0,0.2), lw=0)
         ax.set_xlim(ax.get_xlim())
         ax.set_xlabel('$[Ca]_{SW}\ (mmol\ kg^{-1})$')
 
         # Variable Mg/Ca
         ax = axs[1,2]
         ax.scatter(sub.loc[:, ('Measured', 'Mg/Casw')], sub.loc[:, ('Measured', 'Mg/Caf')],
-                s=sub.loc[:, ('Measured', 'numberforams')], marker=m, color=(0,0,0,0.2), lw=0)
+                   s=sub.loc[:, ('Measured', 'numberforams')], marker=m, color=(0,0,0,0.2), lw=0)
         ax.set_xlim(ax.get_xlim())
         ax.set_xlabel('$Mg/Ca_{SW}$')
 
@@ -209,7 +209,7 @@ def fig2(dat, mdict, ldict):
         if first:
             dsub = isolate_constant_conditions(dat, Ca=10, Mg=50, MgCa=5, DIC=2000, pH=8.1) 
             subset_trendline(ax, dsub, ('Measured', 'Temp'), color='k', line_order=1, 
-                            label='Ambient', label_x=22.5, fontsize=6)
+                             label='Ambient', label_x=22.5, fontsize=6)
             
         # low Mg/Ca
         ssub = isolate_constant_conditions(sub, MgCa=1.3, DIC=2000, tolerance=0.2)
@@ -468,10 +468,10 @@ def fig3(dat, mdict):
         # high [Ca]
         ssub = isolate_constant_conditions(sub, Ca=20, Temp=22, pH=None, DIC=2000)
         emphasise_subset(ax, ssub, ('csys_mid', 'pHtot'), color='C1', yvar=('Measured', 'D_Mg'), m=m)
-        # if first:
-        #     dsub = isolate_constant_conditions(dat, Ca=20, Temp=22, pH=None, DIC=2000)
-        #     subset_trendline(ax, dsub, ('csys_mid', 'pHtot'), 'C1', 1, label=None, label_x=22.5,
-        #                     yvar=('Measured', 'D_Mg'), fontsize=6)
+        if first:
+            dsub = isolate_constant_conditions(dat, Ca=20, Temp=22, pH=None, DIC=2000)
+            subset_trendline(ax, dsub, ('csys_mid', 'pHtot'), 'C1', 1, label=None, label_x=22.5,
+                            yvar=('Measured', 'D_Mg'), fontsize=6)
         
 
         # low [Ca]
@@ -725,7 +725,7 @@ def fig7(rd, gray, rmdict, rrdict, rpred, rpar, tstyle):
               "B: {:.3f}\n".format(upe[1]) +
               "C: {:.1f}\n".format(upe[2]) +
               "D: {:.3f}\n".format(upe[3]) + 
-              "E: {:.3f}\n".format(upe[3]))
+              "E: {:.3f}\n".format(upe[4]))
     ax.text(.05, .84, parlab, va='top', ha='left', fontsize=6, color=(.3, .3, .3), transform=ax.transAxes)
 
     desc = ['culture - white (DIC)', 'culture - white ($CO_3$)', 'sed. trap & culture - white', 'culture - pink']
@@ -848,7 +848,7 @@ def fig7_pH(rd, gray, rmdict, rrdict, rpred, rpar, tstyle):
               "B: {:.3f}\n".format(upe[1]) +
               "C: {:.1f}\n".format(upe[2]) +
               "D: {:.3f}\n".format(upe[3]) + 
-              "E: {:.3f}\n".format(upe[3]))
+              "E: {:.3f}\n".format(upe[4]))
     ax.text(.05, .84, parlab, va='top', ha='left', fontsize=6, color=(.3, .3, .3), transform=ax.transAxes)
 
     desc = ['culture - white (DIC)', 'culture - white ([$H^+$])', 'sed. trap & culture - white', 'culture - pink']
@@ -898,7 +898,7 @@ def fig7_pH(rd, gray, rmdict, rrdict, rpred, rpar, tstyle):
 
     return fig, axs
 
-def fig6(raw, mgca_fn_u, params, idx_exclude, mdict, standard_x):
+def fig5(raw, mgca_fn_u, params, idx_exclude, mdict, standard_x):
     rx = (raw.loc[:, ('Measured', 'Mg/Casw')],  # molar ratio (unitless)
           raw.loc[:, ('csys_mid', 'DIC')] * 1e-6,  # molar
           raw.loc[:, ('Measured', '[Ca]sw')] * 1e-3,  # molar
@@ -1052,9 +1052,9 @@ def fig9(xn, yn_ca, yn_mgca, ref_ca, ref_mg, yr_mgca, xr_mgca, MgCa_CC, mx, my, 
 
     ca_legend = []
     for i, r in dca.iterrows():
-        R,X,L,T,Y,B = r.loc[idx[('Age (Myr)', 'Casw (mM)'),:]].values
+        R,X,L,T,Y,B = r.loc[['Age (Myr)', 'Casw (mM)']].values
         
-        if all(~r.loc[idx[('Age (Myr)', 'Casw (mM)'),:]].isnull()):
+        if all(~r.loc[['Age (Myr)', 'Casw (mM)']].isnull()):
             p = mpl.patches.Polygon([[L,B],[L,T],[R,T],[R,B]], alpha=0.2, color='k')
             cax.add_patch(p)
         ref = r.loc[idx['Reference','Reference']]

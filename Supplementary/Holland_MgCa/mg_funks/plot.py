@@ -224,14 +224,15 @@ def polypred(x, y, xnew, order):
     p = np.polyfit(x, y, order)
     return np.polyval(p, xnew)
 
-def subset_trendline(ax, sub, xvar, color, line_order, yvar=('Measured', 'Mg/Caf'), xpad=0.2, label=None, label_x=None, label_v_offset_frac=0.05, lsargs={}, **kwargs):
+def subset_trendline(ax, sub, xvar, color, line_order, yvar=('Measured', 'Mg/Caf'), sigma=('Uncertainties', 'CI95'), xpad=0.2, label=None, label_x=None, label_v_offset_frac=0.05, lsargs={}, **kwargs):
     """
     Function to plot a trendline through a subset of some data
     """
     x = sub.loc[:, xvar]
     y = sub.loc[:, yvar]
+    sigma = sub.loc[:, sigma]
     
-    p = np.polyfit(x, y, line_order)
+    p = np.polyfit(x, y, deg=line_order, w=1/sigma)
     xnew = np.linspace(x.min() - np.ptp(x) * xpad, x.max() + np.ptp(x) * xpad, 20)
     ax.plot(xnew, np.polyval(p, xnew), color=color, alpha=0.3, zorder=-2, **lsargs)
     
