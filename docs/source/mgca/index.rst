@@ -30,7 +30,7 @@ The multi-factor formulation of Holland et al (sub.), which accounts for the inf
 
 .. math ::
 
-    Mg/Ca_{foram} = Mg/Ca_{SW}\ ^A\ B\ e^{(C_1 [Ca]_{SW} + C_2 [carb] + D) Temp}
+    Mg/Ca_{foram} = Mg/Ca_{SW}\ ^A\ DIC_{SW}\ ^B\ e^{(C\ [Ca]_{SW} + D T + E)}
 
 Functions
 ^^^^^^^^^
