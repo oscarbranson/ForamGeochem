@@ -174,7 +174,7 @@ def holland2020_calc_mgca(temp, mgca_sw=5.17, ca_sw=10.2e-3, carb_sw=2000e-6, p=
     carb_sw : array_like
         Seawater carbon parameter - either DIC, CO3 or pH, depending on the species.
     p : array_like
-        Parameters for the model, in the order [A, B, C1, C2, D].
+        Parameters for the model, in the order [A, B, C, D, E].
 
     Returns
     -------
@@ -198,7 +198,7 @@ def holland2020_calc_temp(mgca, mgca_sw=5.17, ca_sw=10.2e-3, carb_sw=2000e-6, p=
     carb_sw : array_like
         Seawater carbon parameter - either DIC, CO3 or pH, depending on the species.
     p : array_like
-        Parameters for the model, in the order [A, B, C1, C2, D].
+        Parameters for the model, in the order [A, B, C, D, E].
 
     Returns
     -------
@@ -222,7 +222,7 @@ def holland2020_calc_mgca_sw(temp, mgca, ca_sw=10.2e-3, carb_sw=2000e-6, p=None)
     carb_sw : array_like
         Seawater carbon parameter - either DIC, CO3 or pH, depending on the species.
     p : array_like
-        Parameters for the model, in the order [A, B, C1, C2, D].
+        Parameters for the model, in the order [A, B, C, D, E].
 
     Returns
     -------
@@ -246,7 +246,7 @@ def holland2020_calc_carb_sw(temp, mgca, mgca_sw=5.17, ca_sw=10.2e-3, p=None):
     ca_sw : array_like
         Seawater calcium concentration, in mol kg-1.
     p : array_like
-        Parameters for the model, in the order [A, B, C1, C2, D].
+        Parameters for the model, in the order [A, B, C, D, E].
 
     Returns
     -------
@@ -270,7 +270,7 @@ def holland2020_calc_Ca_sw(temp, mgca, mgca_sw=5.17, carb_sw=2000e-6, p=None):
     carb_sw : array_like
         Seawater carbon parameter - either DIC, CO3 or pH, depending on the species.
     p : array_like
-        Parameters for the model, in the order [A, B, C1, C2, D].
+        Parameters for the model, in the order [A, B, C, D, E].
 
     Returns
     -------

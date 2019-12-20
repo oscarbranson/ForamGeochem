@@ -100,15 +100,15 @@ class exponential(proxy):
         return self.last_calc
 
 
-class Holland(proxy):
+class Holland2020(proxy):
     """
-    The multi-factor modified exponential relationship between Mg/Ca, temperature, carbon, [Ca] and Mg/Casw of Holland et al (sub.)
+    The multi-factor modified exponential relationship between Mg/Ca, temperature, carbon, [Ca] and Mg/Casw of Holland et al (2020)
     """
     def __init__(self, mgca=None, temperature=None, carb_sw=2100e-6, ca_sw=10.2e-3, mgca_sw=5.0, parameters=None):
         """
         Create an object for converting between Mg/Ca and environmental parameters.
 
-        Uses the formulation of Holland et al (sub.). Different parameter sets discussed
+        Uses the formulation of Holland et al (2020). Different parameter sets discussed
         in the paper are available via the 'parameters' argument.
 
         mgca = mgca_sw**A * B exp((C1 * ca_sw + C2 * carb_sw + D) * temperature)
@@ -133,7 +133,7 @@ class Holland(proxy):
         """
         super().__init__()
         
-        self.fn_name = 'Holland et al (sub.) Multi-factor Mg/Ca Equation'
+        self.fn_name = 'Holland et al (2020) Multi-factor Mg/Ca Equation'
         self.fn_text = 'mgca = mgca_sw**A * B exp((C1 * ca_sw + C2 * carb_sw + D) * temperature)'
 
         # update class attributes for exponential case
@@ -144,7 +144,7 @@ class Holland(proxy):
         if parameters is None:
             parameters = 'Multispecies_Anand'
         if isinstance(parameters, str):
-            self.parameters = params.load(proxy='mgca', mode='holland_2018', parameters=parameters)
+            self.parameters = params.load(proxy='mgca', mode='holland_2020', parameters=parameters)
         elif isinstance(parameters, foramgeochem.general.params):
             self.parameters = parameters
         else:
@@ -176,7 +176,7 @@ class Holland(proxy):
         """
         List defined parameter sets and associated info.
         """
-        params.available_parameters(proxy='mgca', mode='holland_2018')
+        params.available_parameters(proxy='mgca', mode='holland_2020')
 
     def calc_mgca(self, temperature=None, carb_sw=None, ca_sw=None, mgca_sw=None):
         """
@@ -193,7 +193,7 @@ class Holland(proxy):
         carb_sw : array_like
             Seawater carbon parameter - either DIC, CO3 or pH, depending on the species.
         p : array_like
-            Parameters for the model, in the order [A, B, C1, C2, D].
+            Parameters for the model, in the order [A, B, C, D, E].
 
         Returns
         -------
@@ -226,7 +226,7 @@ class Holland(proxy):
         carb_sw : array_like
             Seawater carbon parameter - either DIC, CO3 or pH, depending on the species.
         p : array_like
-            Parameters for the model, in the order [A, B, C1, C2, D].
+            Parameters for the model, in the order [A, B, C, D, E].
 
         Returns
         -------
@@ -259,7 +259,7 @@ class Holland(proxy):
         ca_sw : array_like
             Seawater calcium concentration, in mol kg-1.        
         p : array_like
-            Parameters for the model, in the order [A, B, C1, C2, D].
+            Parameters for the model, in the order [A, B, C, D, E].
 
         Returns
         -------
@@ -292,7 +292,7 @@ class Holland(proxy):
         carb_sw : array_like
             Seawater carbon parameter - either DIC, CO3 or pH, depending on the species.
         p : array_like
-            Parameters for the model, in the order [A, B, C1, C2, D].
+            Parameters for the model, in the order [A, B, C, D, E].
 
         Returns
         -------
@@ -325,7 +325,7 @@ class Holland(proxy):
         carb_sw : array_like
             Seawater carbon parameter - either DIC, CO3 or pH, depending on the species.
         p : array_like
-            Parameters for the model, in the order [A, B, C1, C2, D].
+            Parameters for the model, in the order [A, B, C, D, E].
 
         Returns
         -------
