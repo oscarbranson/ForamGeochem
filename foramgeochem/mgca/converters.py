@@ -7,16 +7,16 @@ class exponential(proxy):
     """
     The 'classic' exponential relationship between formainiferal Mg/Ca and temperature.
     """
-    def __init__(self, mgca_f=None, temperature=None, parameters=None):
+    def __init__(self, mgca=None, temperature=None, parameters=None):
         """
         The 'classic' exponential relationship between formainiferal Mg/Ca and temperature.
 
-        mgca_f = A * exp(temperature * B)
+        mgca = A * exp(temperature * B)
 
 
         Parameters
         ----------
-        mgca_f : float or array_like
+        mgca : float or array_like
             The Mg/Ca of foraminiferal calcite, in mmol/mol.
         temperature : float or array_like
             The temperature, in degrees celcius.
@@ -29,12 +29,12 @@ class exponential(proxy):
         super().__init__()
         
         self.fn_name = 'Exponential Mg/Ca-Temperature Relationship'
-        self.fn_text = 'mgca_f = A * exp(temperature * B)'
+        self.fn_text = 'mgca = A * exp(temperature * B)'
 
         # update class attributes for exponential case
-        self.variables.update(['mgca_f', 'temperature'])
+        self.variables.update(['mgca', 'temperature'])
         
-        self._var_update(mgca_f=mgca_f, temperature=temperature)
+        self._var_update(mgca=mgca, temperature=temperature)
         self._var_check()
 
         if parameters is None:
@@ -50,7 +50,7 @@ class exponential(proxy):
                 raise ValueError('`parameters` must be a string, a <foramgeochem.general.params> object or array_like')
     
         self._calc_temp = tfr.exp_mgca_2_temp
-        self._calc_mgca_f = tfr.exp_temp_2_mgca
+        self._calc_mgca = tfr.exp_temp_2_mgca
     
     def __repr__(self):
         outstr = []
@@ -71,17 +71,17 @@ class exponential(proxy):
         """
         params.available_parameters(proxy='mgca', mode='exponential')
         
-    def calc_temp(self, mgca_f=None):
+    def calc_temp(self, mgca=None):
         """
         Calculate temperature from Mg/Ca.
         """
-        self._var_update(mgca_f=mgca_f)
+        self._var_update(mgca=mgca)
         self._var_check()
         
-        if 'mgca_f' not in self.missing:
-            self.last_calc = self._calc_temp(self.mgca_f, self.parameters.values)
+        if 'mgca' not in self.missing:
+            self.last_calc = self._calc_temp(self.mgca, self.parameters.values)
         else:
-            raise ValueError('Please provide `mgca_f`')
+            raise ValueError('Please provide `mgca`')
             
         return self.last_calc
 
@@ -93,9 +93,9 @@ class exponential(proxy):
         self._var_check()
         
         if 'temperature' not in self.missing:
-            self.last_calc = self._calc_mgca_f(self.temperature, self.parameters.values)
+            self.last_calc = self._calc_mgca(self.temperature, self.parameters.values)
         else:
-            raise ValueError('Please provide `mgca_f`')
+            raise ValueError('Please provide `mgca`')
             
         return self.last_calc
 
@@ -104,18 +104,18 @@ class Holland(proxy):
     """
     The multi-factor modified exponential relationship between Mg/Ca, temperature, carbon, [Ca] and Mg/Casw of Holland et al (sub.)
     """
-    def __init__(self, mgca_f=None, temperature=None, carb_sw=2100e-6, ca_sw=10.2e-3, mgca_sw=5.0, parameters=None):
+    def __init__(self, mgca=None, temperature=None, carb_sw=2100e-6, ca_sw=10.2e-3, mgca_sw=5.0, parameters=None):
         """
         Create an object for converting between Mg/Ca and environmental parameters.
 
         Uses the formulation of Holland et al (sub.). Different parameter sets discussed
         in the paper are available via the 'parameters' argument.
 
-        mgca_f = mgca_sw**A * B exp((C1 * ca_sw + C2 * carb_sw + D) * temperature)
+        mgca = mgca_sw**A * B exp((C1 * ca_sw + C2 * carb_sw + D) * temperature)
 
         Parameters
         ----------
-        mgca_f : array_like
+        mgca : array_like
             Foraminiferal Mg/Ca in mmol/mol
         temperature : array_like
             Temperature in celcius.
@@ -134,12 +134,12 @@ class Holland(proxy):
         super().__init__()
         
         self.fn_name = 'Holland et al (sub.) Multi-factor Mg/Ca Equation'
-        self.fn_text = 'mgca_f = mgca_sw**A * B exp((C1 * ca_sw + C2 * carb_sw + D) * temperature)'
+        self.fn_text = 'mgca = mgca_sw**A * B exp((C1 * ca_sw + C2 * carb_sw + D) * temperature)'
 
         # update class attributes for exponential case
-        self.variables.update(['mgca_f', 'temperature', 'carb_sw', 'ca_sw', 'mgca_sw'])
+        self.variables.update(['mgca', 'temperature', 'carb_sw', 'ca_sw', 'mgca_sw'])
         
-        self._var_update(mgca_f=mgca_f, temperature=temperature, carb_sw=carb_sw, ca_sw=ca_sw, mgca_sw=mgca_sw)
+        self._var_update(mgca=mgca, temperature=temperature, carb_sw=carb_sw, ca_sw=ca_sw, mgca_sw=mgca_sw)
         
         if parameters is None:
             parameters = 'Multispecies_Anand'
@@ -153,11 +153,11 @@ class Holland(proxy):
             except:
                 raise ValueError('`parameters` must be a string, a <foramgeochem.general.params> object or array_like')
     
-        self._calc_mgca_f = tfr.holland2018_calc_mgca
-        self._calc_temp = tfr.holland2018_calc_temp
-        self._calc_carb = tfr.holland2018_calc_carb_sw
-        self._calc_mgca_sw = tfr.holland2018_calc_mgca_sw
-        self._calc_ca_sw = tfr.holland2018_calc_Ca_sw
+        self._calc_mgca = tfr.holland2020_calc_mgca
+        self._calc_temp = tfr.holland2020_calc_temp
+        self._calc_carb = tfr.holland2020_calc_carb_sw
+        self._calc_mgca_sw = tfr.holland2020_calc_mgca_sw
+        self._calc_ca_sw = tfr.holland2020_calc_Ca_sw
 
     def __repr__(self):
         outstr = []
@@ -178,7 +178,7 @@ class Holland(proxy):
         """
         params.available_parameters(proxy='mgca', mode='holland_2018')
 
-    def calc_mgca_f(self, temperature=None, carb_sw=None, ca_sw=None, mgca_sw=None):
+    def calc_mgca(self, temperature=None, carb_sw=None, ca_sw=None, mgca_sw=None):
         """
         Calculate foram Mg/Ca from Temperature, and seawater Mg/Ca, [Ca] and carbon chemistry.
 
@@ -206,18 +206,18 @@ class Holland(proxy):
         if len(req) > 0:
             raise ValueError('Please provide {}'.format(req))
         
-        self.last_calc = self._calc_mgca_f(temp=self.temperature, mgca_sw=self.mgca_sw, carb_sw=self.carb_sw, ca_sw=self.ca_sw,
+        self.last_calc = self._calc_mgca(temp=self.temperature, mgca_sw=self.mgca_sw, carb_sw=self.carb_sw, ca_sw=self.ca_sw,
                                            p=self.parameters.values)
         
         return self.last_calc
 
-    def calc_temp(self, mgca_f=None, carb_sw=None, ca_sw=None, mgca_sw=None):
+    def calc_temp(self, mgca=None, carb_sw=None, ca_sw=None, mgca_sw=None):
         """
         Calculate Temperature from foram Mg/Ca, and seawater Mg/Ca, [Ca] and carbon chemistry.
 
         Parameters
         ----------
-        mgca_f : array_like
+        mgca : array_like
             Foraminiferal Mg/Ca in mmol/mol
         mgca_sw : array_like
             Seawater Mg/Ca, in mol/mol.
@@ -232,19 +232,19 @@ class Holland(proxy):
         -------
         Temperature in celcius. : array_like
         """
-        self._var_update(mgca_f=mgca_f, carb_sw=carb_sw, ca_sw=ca_sw, mgca_sw=mgca_sw)
+        self._var_update(mgca=mgca, carb_sw=carb_sw, ca_sw=ca_sw, mgca_sw=mgca_sw)
         self._var_check()
         
-        req = self.missing.intersection(['mgca_f', 'carb_sw', 'ca_sw', 'mgca_sw'])
+        req = self.missing.intersection(['mgca', 'carb_sw', 'ca_sw', 'mgca_sw'])
         if len(req) > 0:
             raise ValueError('Please provide {}'.format(req))
             
-        self.last_calc = self._calc_temp(mgca_f=self.mgca_f, carb_sw=self.carb_sw, mgca_sw=self.mgca_sw, ca_sw=self.ca_sw,
+        self.last_calc = self._calc_temp(mgca=self.mgca, carb_sw=self.carb_sw, mgca_sw=self.mgca_sw, ca_sw=self.ca_sw,
                                          p=self.parameters.values)
             
         return self.last_calc
         
-    def calc_carb(self, mgca_f=None, temperature=None, ca_sw=None, mgca_sw=None):
+    def calc_carb(self, mgca=None, temperature=None, ca_sw=None, mgca_sw=None):
         """
         Calculate seawater carbon chemistry from Temperature, foram Mg/Ca, and seawater Mg/Ca and [Ca].
 
@@ -252,7 +252,7 @@ class Holland(proxy):
         ----------
         temperature : array_like
             Temperature in celcius.
-        mgca_f : array_like
+        mgca : array_like
             Foraminiferal Mg/Ca in mmol/mol
         mgca_sw : array_like
             Seawater Mg/Ca, in mol/mol.
@@ -265,19 +265,19 @@ class Holland(proxy):
         -------
         Seawater carbon parameter - either DIC, CO3 or pH, depending on the species. : array_like
         """
-        self._var_update(mgca_f=mgca_f, temperature=temperature, ca_sw=ca_sw, mgca_sw=mgca_sw)
+        self._var_update(mgca=mgca, temperature=temperature, ca_sw=ca_sw, mgca_sw=mgca_sw)
         self._var_check()
         
-        req = self.missing.intersection(['mgca_f', 'temperature', 'ca_sw', 'mgca_sw'])
+        req = self.missing.intersection(['mgca', 'temperature', 'ca_sw', 'mgca_sw'])
         if len(req) > 0:
             raise ValueError('Please provide {}'.format(req))
             
-        self.last_calc = self._calc_carb(mgca_f=self.mgca_f, temperature=self.temperature, mgca_sw=self.mgca_sw, ca_sw=self.ca_sw,
+        self.last_calc = self._calc_carb(mgca=self.mgca, temperature=self.temperature, mgca_sw=self.mgca_sw, ca_sw=self.ca_sw,
                                          p=self.parameters.values)
         
         return self.last_calc
     
-    def calc_ca(self, mgca_f=None, temperature=None, carb_sw=None, mgca_sw=None):
+    def calc_ca(self, mgca=None, temperature=None, carb_sw=None, mgca_sw=None):
         """
         Calculate seawater calcium concentration from Temperature, foram Mg/Ca, and seawater Mg/Ca and carbon chemistry.
 
@@ -285,7 +285,7 @@ class Holland(proxy):
         ----------
         temperature : array_like
             Temperature in celcius.
-        mgca_f : array_like
+        mgca : array_like
             Foraminiferal Mg/Ca in mmol/mol
         mgca_sw : array_like
             Seawater Mg/Ca, in mol/mol.
@@ -298,19 +298,19 @@ class Holland(proxy):
         -------
         Seawater calcium concentration, in mol kg-1. : array_like
         """
-        self._var_update(mgca_f=mgca_f, temperature=temperature, carb_sw=carb_sw, mgca_sw=mgca_sw)
+        self._var_update(mgca=mgca, temperature=temperature, carb_sw=carb_sw, mgca_sw=mgca_sw)
         self._var_check()
         
-        req = self.missing.intersection(['mgca_f', 'temperature', 'carb_sw', 'mgca_sw'])
+        req = self.missing.intersection(['mgca', 'temperature', 'carb_sw', 'mgca_sw'])
         if len(req) > 0:
             raise ValueError('Please provide {}'.format(req))
             
-        self.last_calc = self._calc_ca_sw(mgca_f=self.mgca_f, temperature=self.temperature, mgca_sw=self.mgca_sw, carb_sw=self.carb_sw,
+        self.last_calc = self._calc_ca_sw(mgca=self.mgca, temperature=self.temperature, mgca_sw=self.mgca_sw, carb_sw=self.carb_sw,
                                           p=self.parameters.values)
         
         return self.last_calc
     
-    def calc_mgca_sw(self, mgca_f=None, temperature=None, ca_sw=None, carb_sw=None):
+    def calc_mgca_sw(self, mgca=None, temperature=None, ca_sw=None, carb_sw=None):
         """
         Calculate seawater Mg/Ca from Temperature, foram Mg/Ca, and seawater [Ca] and carbon chemistry.
 
@@ -318,7 +318,7 @@ class Holland(proxy):
         ----------
         temperature : array_like
             Temperature in celcius.
-        mgca_f : array_like
+        mgca : array_like
             Foraminiferal Mg/Ca in mmol/mol
         ca_sw : array_like
             Seawater calcium concentration, in mol kg-1.
@@ -331,14 +331,14 @@ class Holland(proxy):
         -------
         Seawater Mg/Ca, in mol/mol. : array_like
         """
-        self._var_update(mgca_f=mgca_f, temperature=temperature, ca_sw=ca_sw, carb_sw=carb)
+        self._var_update(mgca=mgca, temperature=temperature, ca_sw=ca_sw, carb_sw=carb)
         self._var_check()
         
-        req = self.missing.intersection(['mgca_f', 'temperature', 'ca_sw', 'carb_sw'])
+        req = self.missing.intersection(['mgca', 'temperature', 'ca_sw', 'carb_sw'])
         if len(req) > 0:
             raise ValueError('Please provide {}'.format(req))
             
-        self.last_calc = self._calc_mgca_sw(mgca_sw=self.mgca_f, temperature=self.temperature, carb_sw=self.carb_sw, ca_sw=self.ca_sw,
+        self.last_calc = self._calc_mgca_sw(mgca_sw=self.mgca, temperature=self.temperature, carb_sw=self.carb_sw, ca_sw=self.ca_sw,
                                             p=self.parameters.values)
         
         return self.last_calc

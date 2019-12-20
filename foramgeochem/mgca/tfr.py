@@ -158,8 +158,8 @@ def evans2015_mgca_2_temp(mgca_f, mgca_sw_modern=5.17, mgca_sw_ancient=5.17, p=(
     return log(mgca_f * (C * mgca_sw_modern**H + D * mgca_sw_modern) / (B * (C * mgca_sw_ancient**H + D * mgca_sw_ancient))) / A
 
 
-# Holland et al, 2018
-def holland2018_calc_mgca(temp, mgca_sw=5.17, ca_sw=10.2e-3, carb_sw=2000e-6, p=None):
+# Holland et al, 2020
+def holland2020_calc_mgca(temp, mgca_sw=5.17, ca_sw=10.2e-3, carb_sw=2000e-6, p=None):
     """
     Calculate foram Mg/Ca from Temperature, and seawater Mg/Ca, [Ca] and carbon chemistry.
 
@@ -183,7 +183,7 @@ def holland2018_calc_mgca(temp, mgca_sw=5.17, ca_sw=10.2e-3, carb_sw=2000e-6, p=
     A, B, C, D, E = p
     return mgca_sw**A * carb_sw**B * exp(C * ca_sw + D * temp + E)
 
-def holland2018_calc_temp(mgca, mgca_sw=5.17, ca_sw=10.2e-3, carb_sw=2000e-6, p=None):
+def holland2020_calc_temp(mgca, mgca_sw=5.17, ca_sw=10.2e-3, carb_sw=2000e-6, p=None):
     """
     Calculate Temperature from foram Mg/Ca, and seawater Mg/Ca, [Ca] and carbon chemistry.
 
@@ -207,7 +207,7 @@ def holland2018_calc_temp(mgca, mgca_sw=5.17, ca_sw=10.2e-3, carb_sw=2000e-6, p=
     A, B, C, D, E = p
     return (log(mgca / (mgca_sw**A * carb_sw**B)) - ca_sw * C - E) / D
 
-def holland2018_calc_mgca_sw(temp, mgca, ca_sw=10.2e-3, carb_sw=2000e-6, p=None):
+def holland2020_calc_mgca_sw(temp, mgca, ca_sw=10.2e-3, carb_sw=2000e-6, p=None):
     """
     Calculate seawater Mg/Ca from Temperature, foram Mg/Ca, and seawater [Ca] and carbon chemistry.
 
@@ -231,7 +231,7 @@ def holland2018_calc_mgca_sw(temp, mgca, ca_sw=10.2e-3, carb_sw=2000e-6, p=None)
     A, B, C, D, E = p
     return (mgca / (carb_sw**B * exp(C * ca_sw + D * temp + E)))**(1/A)
 
-def holland2018_calc_carb_sw(temp, mgca, mgca_sw=5.17, ca_sw=10.2e-3, p=None):
+def holland2020_calc_carb_sw(temp, mgca, mgca_sw=5.17, ca_sw=10.2e-3, p=None):
     """
     Calculate seawater carbon chemistry from Temperature, foram Mg/Ca, and seawater Mg/Ca and [Ca].
 
@@ -255,7 +255,7 @@ def holland2018_calc_carb_sw(temp, mgca, mgca_sw=5.17, ca_sw=10.2e-3, p=None):
     A, B, C, D, E = p
     return (mgca / (mgca_sw**A * exp(C * ca_sw + D * temp + E)))**(1/B)
 
-def holland2018_calc_Ca_sw(temp, mgca, mgca_sw=5.17, carb_sw=2000e-6, p=None):
+def holland2020_calc_Ca_sw(temp, mgca, mgca_sw=5.17, carb_sw=2000e-6, p=None):
     """
     Calculate seawater calcium concentration from Temperature, foram Mg/Ca, and seawater Mg/Ca and carbon chemistry.
 
