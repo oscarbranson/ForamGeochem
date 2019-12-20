@@ -1,104 +1,131 @@
+"""
+Multi-parameter relationship between Mg/Ca, [Ca]sw, Mg/Casw, Carbon Chemistry and Temperature of Holland et al. (2020).
+"""
 import foramgeochem
 from foramgeochem.general import proxy, params
-from foramgeochem.mgca import tfr
 from foramgeochem.helpers import load_params
+from uncertainties.unumpy import log, exp
 
-class exponential(proxy):
+# Holland et al, 2020
+def holland2020_calc_mgca(temp, mgca_sw=5.17, ca_sw=10.2e-3, carb_sw=2000e-6, p=None):
     """
-    The 'classic' exponential relationship between formainiferal Mg/Ca and temperature.
+    Calculate foram Mg/Ca from Temperature, and seawater Mg/Ca, [Ca] and carbon chemistry.
+
+    Parameters
+    ----------
+    temp : array_like
+        Temperature in Celcius.
+    mgca_sw : array_like
+        Seawater Mg/Ca, in mol/mol.
+    ca_sw : array_like
+        Seawater calcium concentration, in mol kg-1.
+    carb_sw : array_like
+        Seawater carbon parameter - either DIC, CO3 or pH, depending on the species.
+    p : array_like
+        Parameters for the model, in the order [A, B, C, D, E].
+
+    Returns
+    -------
+    Foraminiferal Mg/Ca in mmol/mol : array_like
     """
-    def __init__(self, mgca=None, temperature=None, parameters=None):
-        """
-        The 'classic' exponential relationship between formainiferal Mg/Ca and temperature.
+    A, B, C, D, E = p
+    return mgca_sw**A * carb_sw**B * exp(C * ca_sw + D * temp + E)
 
-        mgca = A * exp(temperature * B)
+def holland2020_calc_temp(mgca, mgca_sw=5.17, ca_sw=10.2e-3, carb_sw=2000e-6, p=None):
+    """
+    Calculate Temperature from foram Mg/Ca, and seawater Mg/Ca, [Ca] and carbon chemistry.
 
+    Parameters
+    ----------
+    mgca : array_like
+        Foraminiferal Mg/Ca in mmol/mol
+    mgca_sw : array_like
+        Seawater Mg/Ca, in mol/mol.
+    ca_sw : array_like
+        Seawater calcium concentration, in mol kg-1.
+    carb_sw : array_like
+        Seawater carbon parameter - either DIC, CO3 or pH, depending on the species.
+    p : array_like
+        Parameters for the model, in the order [A, B, C, D, E].
 
-        Parameters
-        ----------
-        mgca : float or array_like
-            The Mg/Ca of foraminiferal calcite, in mmol/mol.
-        temperature : float or array_like
-            The temperature, in degrees celcius.
-        parameters : array_like, str or `params` object
-            Either a 'params' object containing parameter values and associated unctertainties,
-            a string selecting one of the in-built options, or an array_like of numbers
-            to use as parameters.To see a list of pre-defined parameters, use:
-               `Holland.available_params()`.
-        """
-        super().__init__()
-        
-        self.fn_name = 'Exponential Mg/Ca-Temperature Relationship'
-        self.fn_text = 'mgca = A * exp(temperature * B)'
+    Returns
+    -------
+    Temperature in Celcius. : array_like
+    """
+    A, B, C, D, E = p
+    return (log(mgca / (mgca_sw**A * carb_sw**B)) - ca_sw * C - E) / D
 
-        # update class attributes for exponential case
-        self.variables.update(['mgca', 'temperature'])
-        
-        self._var_update(mgca=mgca, temperature=temperature)
-        self._var_check()
+def holland2020_calc_mgca_sw(temp, mgca, ca_sw=10.2e-3, carb_sw=2000e-6, p=None):
+    """
+    Calculate seawater Mg/Ca from Temperature, foram Mg/Ca, and seawater [Ca] and carbon chemistry.
 
-        if parameters is None:
-            parameters = 'Multispecies_Anand'
-        if isinstance(parameters, str):
-            self.parameters = params.load(proxy='mgca', mode='exponential', parameters=parameters)
-        elif isinstance(parameters, foramgeochem.general.params):
-            self.parameters = parameters    
-        else:
-            try:
-                self.parameters = params(values=parameters)
-            except:
-                raise ValueError('`parameters` must be a string, a <foramgeochem.general.params> object or array_like')
-    
-        self._calc_temp = tfr.exp_mgca_2_temp
-        self._calc_mgca = tfr.exp_temp_2_mgca
-    
-    def __repr__(self):
-        outstr = []
-        outstr.append(self.fn_name)
-        outstr.append('-' * len(self.fn_name))
-        outstr.append(self.fn_text + '\n')
-        outstr.append(self.parameters.__repr__())
-        outstr.append('\nVariables:')
-        outstr.append('  Accepted: {}'.format(self.variables))
-        outstr.append('  Provided: {}'.format(self.variables.difference(self.missing)))
+    Parameters
+    ----------
+    temp : array_like
+        Temperature in Celcius.
+    mgca : array_like
+        Foraminiferal Mg/Ca in mmol/mol
+    ca_sw : array_like
+        Seawater calcium concentration, in mol kg-1.
+    carb_sw : array_like
+        Seawater carbon parameter - either DIC, CO3 or pH, depending on the species.
+    p : array_like
+        Parameters for the model, in the order [A, B, C, D, E].
 
-        return '\n'.join(outstr)
+    Returns
+    -------
+    Seawater Mg/Ca, in mol/mol. : array_like
+    """
+    A, B, C, D, E = p
+    return (mgca / (carb_sw**B * exp(C * ca_sw + D * temp + E)))**(1/A)
 
-    @staticmethod
-    def available_params():
-        """
-        List defined parameter sets and associated info.
-        """
-        params.available_parameters(proxy='mgca', mode='exponential')
-        
-    def calc_temp(self, mgca=None):
-        """
-        Calculate temperature from Mg/Ca.
-        """
-        self._var_update(mgca=mgca)
-        self._var_check()
-        
-        if 'mgca' not in self.missing:
-            self.last_calc = self._calc_temp(self.mgca, self.parameters.values)
-        else:
-            raise ValueError('Please provide `mgca`')
-            
-        return self.last_calc
+def holland2020_calc_carb_sw(temp, mgca, mgca_sw=5.17, ca_sw=10.2e-3, p=None):
+    """
+    Calculate seawater carbon chemistry from Temperature, foram Mg/Ca, and seawater Mg/Ca and [Ca].
 
-    def calc_mgca(self, temperature=None):
-        """
-        Calculate Mg/Ca from temperature
-        """
-        self._var_update(temperature=temperature)
-        self._var_check()
-        
-        if 'temperature' not in self.missing:
-            self.last_calc = self._calc_mgca(self.temperature, self.parameters.values)
-        else:
-            raise ValueError('Please provide `mgca`')
-            
-        return self.last_calc
+    Parameters
+    ----------
+    temp : array_like
+        Temperature in Celcius.
+    mgca : array_like
+        Foraminiferal Mg/Ca in mmol/mol
+    mgca_sw : array_like
+        Seawater Mg/Ca, in mol/mol.
+    ca_sw : array_like
+        Seawater calcium concentration, in mol kg-1.
+    p : array_like
+        Parameters for the model, in the order [A, B, C, D, E].
 
+    Returns
+    -------
+    Seawater carbon parameter - either DIC, CO3 or pH, depending on the species. : array_like
+    """
+    A, B, C, D, E = p
+    return (mgca / (mgca_sw**A * exp(C * ca_sw + D * temp + E)))**(1/B)
+
+def holland2020_calc_Ca_sw(temp, mgca, mgca_sw=5.17, carb_sw=2000e-6, p=None):
+    """
+    Calculate seawater calcium concentration from Temperature, foram Mg/Ca, and seawater Mg/Ca and carbon chemistry.
+
+    Parameters
+    ----------
+    temp : array_like
+        Temperature in Celcius.
+    mgca : array_like
+        Foraminiferal Mg/Ca in mmol/mol
+    mgca_sw : array_like
+        Seawater Mg/Ca, in mol/mol.
+    carb_sw : array_like
+        Seawater carbon parameter - either DIC, CO3 or pH, depending on the species.
+    p : array_like
+        Parameters for the model, in the order [A, B, C, D, E].
+
+    Returns
+    -------
+    Seawater calcium concentration, in mol kg-1. : array_like
+    """
+    A, B, C, D, E = p
+    return (log(mgca / (mgca_sw**A * carb_sw**B)) - temp * D - E) / C
 
 class Holland2020(proxy):
     """
@@ -153,11 +180,11 @@ class Holland2020(proxy):
             except:
                 raise ValueError('`parameters` must be a string, a <foramgeochem.general.params> object or array_like')
     
-        self._calc_mgca = tfr.holland2020_calc_mgca
-        self._calc_temp = tfr.holland2020_calc_temp
-        self._calc_carb = tfr.holland2020_calc_carb_sw
-        self._calc_mgca_sw = tfr.holland2020_calc_mgca_sw
-        self._calc_ca_sw = tfr.holland2020_calc_Ca_sw
+        self._calc_mgca = holland2020_calc_mgca
+        self._calc_temp = holland2020_calc_temp
+        self._calc_carb = holland2020_calc_carb_sw
+        self._calc_mgca_sw = holland2020_calc_mgca_sw
+        self._calc_ca_sw = holland2020_calc_Ca_sw
 
     def __repr__(self):
         outstr = []

@@ -2,6 +2,7 @@
 The Mg/Ca palaeothermometer.
 """
 
-__all__ = ['exponential', 'Holland']
+__all__ = ['exponential', 'Holland2020']
 
-from .converters import exponential, Holland
+from .cv_exponential import exponential
+from .cv_holland2020 import Holland2020
