@@ -68,6 +68,45 @@ def carb_chem(raw, dat, mdict, ldict):
         
     return fig, ax
 
+def culture_chem(dat, mdict, ldict):
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=[8, 3.6])
+
+    for who in mdict.keys():
+            ind = dat.Measured.who == who
+            if who in ['Allen', 'Hönisch']:
+                continue
+            if who not in ['This Study']:
+                s = 25
+                z = -1
+                c = 'C3'
+            else:
+                s = 35
+                z = 1
+                c = 'C0'
+            
+            ma = ax1.scatter(dat.loc[ind, ('csys_mid', 'pHtot')], 
+                            dat.loc[ind, ('csys_mid', 'DIC')], 
+                            marker=mdict[who], label=ldict[who],
+                            color=c, alpha=0.75,
+                            edgecolor='k', lw=0.5, s=s, zorder=z)
+            
+            ma = ax2.scatter(dat.loc[ind, ('Measured', '[Ca]sw')], 
+                            dat.loc[ind, ('Measured', '[Mg]sw')], 
+                            marker=mdict[who], label=ldict[who],
+                            color=c, alpha=0.75,
+                            edgecolor='k', lw=0.5, s=s, zorder=z)
+            
+            ax1.legend()
+            
+    ax1.set_xlabel('$pH_{tot}$')
+    ax1.set_ylabel('DIC $(\mu mol kg^{-1})$')
+    ax2.set_xlabel('$[Ca]_{SW} ~ (mM)$')
+    ax2.set_ylabel('$[Mg]_{SW} ~ (mM)$')
+
+    fig.tight_layout()
+
+    return fig, (ax1, ax2)
+
 
 # Code for making figures in the Python notebook supplement.
 ############################################################
