@@ -127,7 +127,7 @@ def holland2020_calc_Ca_sw(temp, mgca, mgca_sw=5.17, carb_sw=2000e-6, p=None):
     A, B, C, D, E = p
     return (log(mgca / (mgca_sw**A * carb_sw**B)) - temp * D - E) / C
 
-class Holland2020(proxy):
+class holland_2020(proxy):
     """
     The multi-factor modified exponential relationship between Mg/Ca, temperature, carbon, [Ca] and Mg/Casw of Holland et al (2020)
     """

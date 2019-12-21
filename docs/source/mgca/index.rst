@@ -36,7 +36,7 @@ Functions
 ^^^^^^^^^
 
 Converter:
- - :class:`foramgeochem.mgca.Holland`
+ - :class:`foramgeochem.mgca.holland_2020`
 
 Transfer functions:
  - :func:`~foramgeochem.mgca.tfr.holland2018_calc_mgca`

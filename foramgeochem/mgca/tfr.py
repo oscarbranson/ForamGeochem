@@ -2,6 +2,9 @@
 Transfer functions used for converting between Mg/Ca and environmental parameters.
 """
 
+from foramgeochem.mgca.cv_holland2020 import holland2020_calc_Ca_sw, holland2020_calc_carb_sw, holland2020_calc_mgca, holland2020_calc_mgca_sw, holland2020_calc_temp
+from foramgeochem.mgca.cv_exponential import exp_mgca_2_temp, exp_temp_2_mgca
+
 # Evans and Muller (2012)
 # https://doi.org/10.1029/2012PA002315
 def evans2012_temp_2_mgca(temp, mgca_sw_modern=5.17, mgca_sw_ancient=5.17, p=None):
