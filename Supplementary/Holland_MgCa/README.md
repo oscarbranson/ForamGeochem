@@ -1,4 +1,4 @@
-# Supplementary Files for Holland et al (*in rev*)
+# Supplementary Files for Holland et al (2020; [doi:10.1016/j.gca.2020.01.015](https://doi.org/10.1016/j.gca.2020.01.015))
 
 - [Model Selection methodology](https://nbviewer.jupyter.org/github/oscarbranson/ForamGeochem/blob/master/Supplementary/Holland_MgCa/ModelChoice.ipynb)
 - [Complete Data Analysis (as published)](https://nbviewer.jupyter.org/github/oscarbranson/ForamGeochem/blob/master/Supplementary/Holland_MgCa/Holland_Supplement.ipynb)
